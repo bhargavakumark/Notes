@@ -1,6 +1,8 @@
 iptables
 ========
 
+.. toctree::
+
 Packet Traversal for Non-Local Destination
 ------------------------------------------
 
@@ -109,4 +111,25 @@ Once again, it is important to realize that the fwmark added to a packet is only
 iproute2 supports the use of fwmark as a selector for rule lookups, so we can use fwmarks in the routing policy database to cause packets to be conditionally routed based on that fwmark. This can lead to great complexity if a machine has multiple routing tables, packet filters, and other fancy networking tools, such as NAT or proxies. Caveat emptor.
 
 A convention is to use the same number for a routing table and fwmark where possible. This simplifies the maintenance of the systems which are using iproute2 and fwmark, especially if the table identifier and fwmark are set in a configuration file with the same variable name. Since we are testing this on the command line, we'll just make sure that we can add the rules first.
+
+Tracking a Packet
+-----------------
+
+Ensure that **ipt_LOG** and **syslog-ng** modules are loaded
+
+To trace all packets to port 80
+
+.. code-block:: sql
+
+        iptables -t raw -A PREROUTING -p tcp --dport 80 -j TRACE
+        iptables -t raw -A OUTPUT -p tcp --dport 80 -j TRACE
+
+Logs should end up in */var/log/message* or */var/log/firewall* depending upon syslog-ng configuration
+
+To just a packet which satisfies a rule, use **-j LOG**, valid in *nat* and *filter* chains
+
+.. code-block:: sql
+
+        -j LOG --log-prefix "rule description"
+
 
