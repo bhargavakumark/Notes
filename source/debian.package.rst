@@ -64,6 +64,21 @@ dh_make requires deb_helper package.
 
         dh_make  -e blabla@blabla -f ./foo.tar.gz
 
+::
+
+        # ls 
+        tcpdump-3.9.4.tar.gz
+        # tar zxf tcpdump_3.9.4.tar.gz
+        # cd tcpdump_3.9.4
+        # dh_make -e blabla@blabla.org -f ../tcpdump-3.4.9.tar.gz
+        # cd debian 
+        # vim Control
+        ####### make modifications as necessary here
+        # vim rules
+        #### edif if necessary
+        # cat dirs
+        # dpkg-buildpackage
+
 and answer the questions. This will create a directory which contain control file control and the rules file rules.
 
 ::
@@ -71,4 +86,15 @@ and answer the questions. This will create a directory which contain control fil
         dpkg-buildpackage -fakeroot
 
 cvs-buildpackage customised for using cvs co and build and remove unncessary files.
+
+Installed files by a package
+------------------------------------
+
+::
+
+        # dpkg -i tcpdump
+        /usr
+        /usr/sbin
+        /usr/sbin/tcpdump
+        /usr/share
 
