@@ -1,7 +1,9 @@
 iptables
 ========
 
-.. toctree::
+.. contents::
+
+.. image:: images/kernel_net.png
 
 Packet Traversal for Non-Local Destination
 ------------------------------------------
@@ -38,6 +40,7 @@ Packet Traversal for Locally Generated
 
 Multiple Outbound Internet links
 --------------------------------
+
 .. code-block:: sql
         :linenos:
 
@@ -119,7 +122,7 @@ Ensure that **ipt_LOG** and **syslog-ng** modules are loaded
 
 To trace all packets to port 80
 
-.. code-block:: sql
+::
 
         iptables -t raw -A PREROUTING -p tcp --dport 80 -j TRACE
         iptables -t raw -A OUTPUT -p tcp --dport 80 -j TRACE
@@ -128,7 +131,7 @@ Logs should end up in */var/log/message* or */var/log/firewall* depending upon s
 
 To just a packet which satisfies a rule, use **-j LOG**, valid in *nat* and *filter* chains
 
-.. code-block:: sql
+::
 
         -j LOG --log-prefix "rule description"
 

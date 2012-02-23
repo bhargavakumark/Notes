@@ -1,15 +1,21 @@
 RPM
 ===
 
+.. contents::
+
 Extracing a rpm
 ---------------
+
 ::
-        rpm2cpio myrpmfile.rpm | cpio -idmv
+ 
+         rpm2cpio myrpmfile.rpm | cpio -idmv
 
 
 Listing files in a rpm file
 ---------------------------
+
 ::
+
         rpm -qpl file.rpm 
 
 

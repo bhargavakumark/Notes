@@ -1,6 +1,8 @@
 PAM
 ===
 
+.. contents::
+
 Conf files
 ----------
 - /etc/pam.conf
