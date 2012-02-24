@@ -1174,6 +1174,48 @@ NFS inode limit
 ===============
 NFS handles have 32-bit inode number, where as filesystems would have 64-bit inodes. Which means any files with inode number greater than 2^32 cannot be used. 2^32 is a lot of files, 4-billion files, which we are unlikely to touch and since inode numbers are reused it is not a problem.
 
+
+
+----------------------
+NFS Performance Tuning
+----------------------
+=============================================
+Tuning the number of nfsd daemons on a server
+=============================================
+
+* http://osr507doc.sco.com/en/PERFORM/NFS_tuning.html
+* http://docstore.mik.ua/orelly/networking_2ndEd/nfs/ch16_05.htm
+
+
+Like biods, nfsd daemons provide processes for the scheduler to control -- the bulk of the work dealing with requests from clients is performed inside the kernel. Each nfsd is available to service an incoming request unless it is already occupied. The more nfsds that are running, the faster the incoming requests can be satisfied. There is little context switching overhead with running several nfsds as only one sleeping daemon is woken when a request needs to be served. 
+
+If you run more nfsds than necessary, the main overhead is the pages of memory that each process needs for its u-area, data, and stack (program text is shared). Unused nfsd processes will sleep; they will be candidates for being paged or swapped out should the system need to obtain memory. 
+
+If too few nfsds are running on the server, or its other subsystems, such as the hard disk, cannot respond fast enough, it will not be able to keep up with the demand from clients. You may see this on clients if several requests time out but the server can still service other requests. If you run the command nfsstat -c on the clients, its output provides some information about the server's performance as perceived by the client:
+
+::
+
+   Client rpc:
+   calls    badcalls retrans  badxid   timeout  wait      newcred
+   336033   50       413      418      299      0         0
+   ...
+
+If badxid is non-zero and roughly equal to retrans, as is the case in this example, the server is not keeping up with the clients' requests.
+
+If you run too few nfsds on a server, the number of messages on the request queue builds up inside the upstream networking protocol stac
+
+The CPU speed of a pure NFS server is rarely a constraining factor. Once the nfsd thread gets scheduled, and has read and decoded an RPC request, it doesn't do much more within the NFS protocol that requires CPU cycles. Other parts of the system, such as the Unix filesystem and cache management code, may use CPU cycles to perform work given to them by NFS requests. NFS usually poses a light load on a server that is providing pure NFS service.
+
+There are two aspects to CPU loading: increased nfsd thread scheduling latency, and decreased performance of server-resident, CPU-bound processes. Normally, the nfsd threads will run as soon as a request arrives, because they are running with a kernel process priority that is higher than that of all user processes. However, if there are other processes doing I/O, or running in the kernel (doing system calls) the latency to schedule the nfsd threads is increased.
+
+Instead of getting the CPU as soon as a request arrives, the nfsd thread must wait until the next context switch, when the process with the CPU uses up its time slice or goes to sleep. Running an excessive number of interactive processes on an NFS server will generate enough I/O activity to impact NFS performance. These loads affect a server's ability to schedule its nfsd threads; latency in scheduling the threads translates into decreased NFS request handling capacity since the nfsd threads cannot accept incoming requests as quickly.
+
+The two major costs associated with a context switch are loading the address translation cache and resuming the newly scheduled task on the CPU. In the case of NFS server threads, both of these costs are near zero. All of the NFS server code lives in the kernel, and therefore has no user-level address translations loaded in the memory management unit. In addition, the task-to-task switch code in most kernels is on the order of a few hundred instructions. Systems can context switch much faster than the network can deliver NFS requests.
+
+NFS server threads don't impose the "usual" context switching load on a system because all of the NFS server code is in the kernel. Instead of using a per-process context descriptor or a user-level process "slot" in the memory management unit, the nfsd threads use the kernel's address space mappings. This eliminates the address translation loading cost of a context switch.
+
+
+
 TCPUtils
 --------
 This page describes the utilities available in nasgw/src/linux/common/tcputils
