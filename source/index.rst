@@ -10,7 +10,8 @@ Welcome to segfault's documentation!
         :maxdepth: 1
         :glob:
 
-        *
+        filestore/filestore
+        * 
 
 Indices and tables
 ==================

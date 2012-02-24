@@ -1,28 +1,8 @@
-FileStore
-=========
+NFS
+===
 
 .. contents::
 
-Configure PXE install on SFS
-----------------------------
-
-::
-
-    #!/bin/bash
-    set -x
-    mkdir /tmp/imagecontents
-    mv /instserver /instserver_secondary
-    mkdir /instserver
-    mount -o loop /tmp/image.iso /tmp/imagecontents
-    cp -a /tmp/imagecontents/* /instserver
-    tar -C /tmp -cf /instserver/imagecontents.tar imagecontents
-    umount /tmp/imagecontents
-    set +x
-
-NFS
----
-
-------------------
 NLM Implementation
 ------------------
 
@@ -59,7 +39,6 @@ In step 3, we also add an entry into /etc/hosts for the nlmmonitorname which is 
 
 Step 4, refer NLMConnectionResets 
 
----------------------
 NLM Connection Resets
 ---------------------
 
@@ -73,7 +52,6 @@ NLM Connection Reset on Dest (NAT reset)
 ========================================
 Before becoming NLM master the node could have been NLM slave, and could have been having forwarding rules. If there are existing NATed connections to a node, before the node became NLM master then iptables -t nat -F will only be effective for new connections, already existing NAT connections would still continue to be NATed. For resetting those NATed connections, we use sfs_tcp_reset_ether utility from TCPUtils to reset existing NAT connections, which send ethernet level packets to do a TCP reset. We can't use sfs_tcp_reset to send ip level packets, as they would undergo NAT and won't reach the client correctly. There are some limitations to sfs_tcp_reset_ether in that it will only try to guess the sequence number only once. In this case if the reset fails, then after some time the connection would automatically get reset by TCP retries, and lock requests would recover. The list of these existing NATed connections are picked up from /proc/net/ip_conntrack.
 
--------------------
 NLM Internal Shares
 -------------------
 
@@ -161,7 +139,6 @@ To avoid the problem described we create internal nfs shares for all the filesys
 
 The internal shares are always exported with the options rw,no_root_squash. This does not creates problems even if the actual shares are exported as read-only, even if we have added permissions for NLM clients to take rw locks, the lock request would pass the RPC layer but get denied at the NLM layer which will use the HOST name filed in the NLM payload. Based on similar testing no problems were observed with no_root_squash even if the original shares were exported as root_squash. 
 
------------------------
 NLM Connection Tracking
 -----------------------
 
@@ -253,7 +230,6 @@ Turn on/off NLM Manual connection tracking
 *    NLM_TRACK_CONN - can take values of 0/1, '1' will enable this features any other value will disable this
 *    NLM_TRACK_CONN_USE_ONLY_HOSTNAMES - can take values 0/1, '1'' will disable use of ips if reverse-name lookup does not work, any other value will enable use of ips 
 
------------
 /proc/locks
 -----------
 Reference : http://www.centos.org/docs/5/html/Deployment_Guide-en-US/s1-proc-topfiles.html
@@ -274,7 +250,6 @@ Each lock has its own line which starts with a unique number. The second column 
 
 The third column can have two values: ADVISORY or MANDATORY. ADVISORY means that the lock does not prevent other people from accessing the data; it only prevents other attempts to lock it. MANDATORY means that no other access to the data is permitted while the lock is held. The fourth column reveals whether the lock is allowing the holder READ or WRITE access to the file. The fifth column shows the ID of the process holding the lock. The sixth column shows the ID of the file being locked, in the format of MAJOR-DEVICE:MINOR-DEVICE:INODE-NUMBER. The seventh and eighth column shows the start and end of the file's locked region. 
 
------------------
 NFS Internal FSID
 -----------------
 
@@ -299,7 +274,6 @@ FSID ranges from 1 to 2147483647, which has splitted into 2 ranges
 *    1 to 1073741823 is public fsid, can be used by customers
 *    1073741824 to 2147483647 is private fsid range, which is used automatic assignment of fsid 
 
----------------------
 NFS Cache Consistency
 ---------------------
 
@@ -381,7 +355,6 @@ close-to-open cache consistency and cifs
 Should we expect close-to-open consistency on directories? 
         http://www.spinics.net/lists/linux-nfs/msg12341.html
 
------------------
 NFS Share Options
 -----------------
 
@@ -726,7 +699,6 @@ This can be useful for NFS failover, to ensure that both servers of the failover
 
 fsid=0 has magic properties in NFSv4. For NFSv4, there is a distinguished filesystem which is the root of all exported filesystem. This is specified with fsid=root or fsid=0 both of which mean exactly the same thing.
 
-----------------------
 NFS Ack Storm Handling
 ----------------------
 
@@ -799,7 +771,6 @@ Ack-storm faced in RHCS and possible solutions suggested on the forum
 Hijacking a connection causing it to enter a ack-storm 
     http://fullgames4ever.blogspot.com/2010/10/hacking-tips_18.html
 
----------------
 NFS Development
 ---------------
 
@@ -819,7 +790,6 @@ Compiling NFS modules
                 make -C /lib/modules/$(KVERSION)/build M=$(PWD) clean
 
 
--------------------
 NFS Troubleshooting
 -------------------
 
@@ -938,7 +908,6 @@ NFS server only supports posix acls, i.e, system.posix_acl_access and system.pos
         2241         } 
         2242        
 
-------------
 NFS Ethereal
 ------------
 ethereal has 2 types of filters.
@@ -971,7 +940,6 @@ Display filter reference for NFS
 * http://docstore.mik.ua/orelly/networking_2ndEd/nfs/ch15_04.htm
 * https://bugzilla.redhat.com/show_bug.cgi?id=201211
 
------------------
 NFS handle format
 -----------------
 
@@ -1176,7 +1144,6 @@ NFS handles have 32-bit inode number, where as filesystems would have 64-bit ino
 
 
 
-----------------------
 NFS Performance Tuning
 ----------------------
 =============================================
@@ -1213,58 +1180,5 @@ Instead of getting the CPU as soon as a request arrives, the nfsd thread must wa
 The two major costs associated with a context switch are loading the address translation cache and resuming the newly scheduled task on the CPU. In the case of NFS server threads, both of these costs are near zero. All of the NFS server code lives in the kernel, and therefore has no user-level address translations loaded in the memory management unit. In addition, the task-to-task switch code in most kernels is on the order of a few hundred instructions. Systems can context switch much faster than the network can deliver NFS requests.
 
 NFS server threads don't impose the "usual" context switching load on a system because all of the NFS server code is in the kernel. Instead of using a per-process context descriptor or a user-level process "slot" in the memory management unit, the nfsd threads use the kernel's address space mappings. This eliminates the address translation loading cost of a context switch.
-
-
-
-TCPUtils
---------
-This page describes the utilities available in nasgw/src/linux/common/tcputils
-
-Related Info :
-
-* http://monkey.org/~dugsong/dsniff/
-* http://www.tcpdump.org/pcap.htm
-
--------------
-sfs_tcp_reset
--------------
-This program helps in sending a TCP reset to any connection that exists on the local node. The connection can be over any device, on virtual and physical ip. Usage syntax as on 23rd Feb 2010 is
-
-::
-
-        Usage: tcp_reset device localip port remoteip port
-
-The device argument specifies the device on which the connection has been established. Currently we do not automatically find out the device on which the localip is online. The localip should be plumbed on the device, no checks are made to verify this.
-
-Steps during reset of the Connection
-
-#.    Create a filter to capture incoming packets for this connection (localip:port -> remoteip:port). We do this before sending out any packets, as we don't want to miss the ack that would be send immedieately after we send a tickle. If we create a filter after we send out a tickle, the reply from client could reach us before we start our capturing.
-#.    Open a libnet handle to send packets out, with type RAW4 socket.
-#.    Send a tickle for this connection, so the remote side on receiving this packet will send out a packet with seq no (ack no). We are only interested in the seq no. The packets that we send out are verified for correct seq no by the remote side, if the seq no does not match with the expected seq no on the remote side, the remote side will discard it.
-#.    Capture the first return packet for this connection, and use that seq no to send a reset. This will work if the seq no has not changed since we captures and sent a reset. If this connection is used heavily, then it might be possible that between the time we capture a packet and use its seq no, the seq no might have changed due to other content being exchanged between both parties. We only make only attempt and do not verify that the RST is acknowledged correctly. So this might have worked or might have failed. We also wait infinitely for the reply from remote side, if the remote side does not reply or is dead, its upto the caller to terminate this process.
-#.    Send a tickle again, so that the remote site will send a RST back to the server and the server also clears the connections in its cache. 
-
-Enhancements
-
-*    Automatically detect the device to be used for the given local ip
-*    Accept a timeout value as an argument and wait only for that time for reply from remote side 
-
--------------------
-sfs_tcp_reset_ether
--------------------
-This program is similar to sfs_tcp_reset except that is sends ethernet level packets instead of IP level packets. Usage syntax as on 23rd Feb 2010 is
-
-::
-
-        Usage: tcp_reset_ether device remote_mac remoteip port localip port
-
-The device argument specifies the device on which the connection has been established. The remote_mac is the mac address of the remote ip, this mac address could be either be the mac address of the remote host or any gateway(if the remote host can only be reached from a gateway). Similar restrictions to device exists as in sfs_tcp_reset.
-
-Steps during reset of the Connection
-
-#.    Create a filter to capture incoming packets for this connection (localip:port -> remoteip:port). We do this before sending out any packets, as we don't want to miss the ack that would be send immedieately after we send a tickle. If we create a filter after we send out a tickle, the reply from client could reach us before we start our capturing.
-#.    Open a libnet handle to send packets out, with type LINK socket. This allows us to add even ethernet header. For a RAW4 socket we can only add IP headers and not ethernet headers. This can be used to reset NAT connections, whose traffic cannot be captured correctly by pcap.
-#.    Send a tickle for this connection, so the remote side on receiving this packet will send out a packet with seq no (ack no). We are only interested in the seq no. The packets that we send out are verified for correct seq no by the remote side, if the seq no does not match with the expected seq no on the remote side, the remote side will discard it.
-#.    Capture the first return packet for this connection, and use that seq no to send a reset. This will work if the seq no has not changed since we captures and sent a reset. If this connection is used heavily, then it might be possible that between the time we capture a packet and use its seq no, the seq no might have changed due to other content being exchanged between both parties. We only make only attempt and do not verify that the RST is acknowledged correctly. So this might have worked or might have failed. We also wait infinitely for the reply from remote side, if the remote side does not reply or is dead, its upto the caller to terminate this process. Fortunately, pcap can capture incoming packets of a NAT and not outgoing packets. So for NAT connections, we use ethernet level packets to send tickles and a normal pcap filter to captures the replies for seq no. 
 
 
