@@ -1,14 +1,10 @@
-Backup
-======
+NetBackup
+=========
 
 .. contents::
 
-NetBackup
----------
-
-=====================
 NetBackup Accelerator
-=====================
+---------------------
 
 * The increase in speed is made possible by change detection techniques on the client.
 * The client sends the changed data to the media server in a more efficient backup stream. The media server combines the changed data with the rest of the client's data that is stored in previous backups to create a new full backup image without needing to transfer all the client data.
@@ -65,40 +61,23 @@ backup policy prevents backups from that policy using Windows NTFS
 Change Journal feature even if the* **Use Change Journal** option is set on the 
 client.
 
-=========
 Licensing
-=========
+---------
 
 * NetBackup Accelerator functionality is included in the new NetBackup Data Protection Optimization Option. This option replaces the NetBackup Deduplication Option and the Deduplication Add-on Option for the platform license and is available free of charge to customers licensed for those options, however customers will need to request a new license key to activate the Accelerator component.
 
+Troubleshooting/Debugging
+-------------------------
 
-EMC
----
+------------------------
+How to set VERBOSE level
+------------------------
 
-=======================
-Avamar NDMP Accelerator
-=======================
+In Unix environments, edit **/usr/openv/netbackup/bp.conf** and add the following lines. Valid values for VERBOSE are 0-5 and 99.
 
-**NAS backup data deduplication (NDMP Stream Handler)**
-        For NAS environments, Avamar deduplicates NDMP backup data streams at the Avamar NDMP
-        Accelerator node. By comparing sub-file data segments to those already stored on a central Avamar
-        Data Store, only new and unique segments are transferred during daily full backups via IP LAN/WAN
-        links. This method reduces the size of backup data before it is transferred to the Avamar Data Store. As a
-        result, users continue to leverage existing IP LAN/WAN connectivity for data protection and achieve a
-        dramatic reduction in backup completion times.
+::
+	
+	VERBOSE = 5
 
-**Daily full backups (Optimised Synthetics)**
-        A full (level-0) NAS backup is performed only once during the initial setup of the Avamar NDMP
-        Accelerator node. Subsequent daily backups only request level-1 incremental dumps from the NAS
-        systems. Avamar’s technology deduplicates the backup data and also creates daily full backup images
-        that can be recovered in one-step. Avamar eliminates the need for recurring, lengthy level-0 full backups
-        and the tedious process of restoring from the last good full plus subsequent incremental backups to
-        reach the desired recovery point.
-
-**Daily replication for disaster recovery (AIR - Auto Image Replication)** 
-        Avamar also enables encrypted, asynchronous replication of data stored in an Avamar server to another
-        Avamar server deployed in a remote location, eliminating the need to ship tapes. Replication can be
-        scheduled to run at off-peak hours to minimize network impact. In the event of a disaster scenario
-        where an Avamar system becomes unavailable, data can be recovered directly from the replication
-        target, providing a high level of availability.
+In Windows environments, In **Host Properties** change the log level to 5, regedit **\\HKEY_LOCAL_MACHINE\SOFTWARE\VERITAS\NetBackup\CurrentVersion\Config**, change **VERSION** to 9 or 10
 
