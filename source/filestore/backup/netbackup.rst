@@ -81,3 +81,31 @@ In Unix environments, edit **/usr/openv/netbackup/bp.conf** and add the followin
 
 In Windows environments, In **Host Properties** change the log level to 5, regedit **\\HKEY_LOCAL_MACHINE\SOFTWARE\VERITAS\NetBackup\CurrentVersion\Config**, change **VERSION** to 9 or 10
 
+Deduplication
+-------------
+
+What algorithm/compression scheme is used by PureDisk for fingerprinting?
+        PureDisk 6.x uses a MD5 hash algorithm to calculate the file and segment fingerprints.  The MD5 hash calculation creates a 128 bit fingerprint. This fingerprint provides 2^128 unique combinations. That is 340,282,366,920,938,000,000,000,000,000,000,000,000 or over 340 x 10^36 unique combinations. PureDisk 6.2 adds another layer of protection on top of the MD5 data identification. PureDisk 6.2 detects potential MD5 data collisions using a second hash on the segment data. The combination of two hashes results in a new fingerprint that is neither MD5 nor SHA-x.  The combined hash virtually eliminates the chance of a collision and effectively protects the system against artificially generated MD5 collision files.
+
+Some information on Fingerprint used in PD/MSDP:
+PD / PDDE hash is MD5 based but not plain MD5.
+E.g. compute PD hash of segment S:
+
+*       Extend S by appending CRC of S to the content of S.
+*       Compute MD5 of extended S
+*       Resulting hash is different from the MD5 of extended S.
+*       Main benefit: MD5 collision protection
+
+Suppose that two files have different content but the same MD5. This is an MD5 collision.
+
+*       In NBU Dedupe, these two files will receive a different fingerprint. No collision in NBU Dedupe !
+
+Does this mean that NBU Dedupe is completely collision proof?
+
+*       No! Any hash based approach has a risk of collisions. Possibility is very remote.
+*       But the PD hash function moves the possible collisions to an area for which there are no known exploits (contrary to plain MD5).
+
+Secondary benefit:
+
+*       Still MD5 based and therefore computationally efficient + only 16 bytes wide.
+
