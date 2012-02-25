@@ -1150,8 +1150,10 @@ NFS Performance Tuning
 Tuning the number of nfsd daemons on a server
 =============================================
 
-* http://osr507doc.sco.com/en/PERFORM/NFS_tuning.html
-* http://docstore.mik.ua/orelly/networking_2ndEd/nfs/ch16_05.htm
+Tuning NFS performance
+        http://osr507doc.sco.com/en/PERFORM/NFS_tuning.html
+Server tuning: Manaaging NFS and NIS second edition
+        http://docstore.mik.ua/orelly/networking_2ndEd/nfs/ch16_05.htm
 
 
 Like biods, nfsd daemons provide processes for the scheduler to control -- the bulk of the work dealing with requests from clients is performed inside the kernel. Each nfsd is available to service an incoming request unless it is already occupied. The more nfsds that are running, the faster the incoming requests can be satisfied. There is little context switching overhead with running several nfsds as only one sleeping daemon is woken when a request needs to be served. 

@@ -197,3 +197,83 @@ The third type of per-instance resource that CFS controls is that whose per-inst
 *   **User quota files**. During operation, the CFS instance that controls the master quota file delegates the right to allocate quota-controlled space to other instances on request. Each CFS instance uses its own quota file to record changes in space consumption as it allocates and frees space. The primary CFS instance reconciles per-instance quota file contents with the master each time a file system is mounted or unmounted, each time quota enforcement is enabled or disabled, and whenever the instance that owns the master quota file cannot delegate quota-controlled space without exceeding the user or group quota. Immediately after reconciliation, all per-instance quota file records contain zeros
 *   **Current usage tables**. These files track the space occupied by filesets. As it does with quota files, CFS reconciles them when a file system is mounted or unmounted. When an instance increases or decreases the amount of storage used by a fileset, it adjusts its own current usage table to reflect the increase or decrease in space used by the fileset and triggers background reconciliation of the current usage table files with the master 
 *   **Link count tables**. CFS instances use these files to record changes in the number of file inodes linked to an extended attribute inode. Each time an instance creates or removes a link, it increments or decrements the extended attribute inode’s link count in its link count table. A file system’s primary instance reconciles per-instance link count table contents with the master file whenever the file system is mounted or unmounted, when a snapshot is created, and in addition, periodically (approximately every second). When reconciliation results in an attribute inode having zero links, CFS marks it for removal. Immediately after reconciliation, all per-instance link count tables contain zeros
+
+CFS Tunables
+------------
+
++-------------------------------+----------------------------------------------------------+
+| vxtunefs parameter            | Effect/comments                                          |
++===============================+==========================================================+
+| **discovered_direct_iosz**    | I/O request size above which CFS transfers data directly |
+| **(default: 256 kilobytes)**  | to and from application buffers, without copying to page |
+|                               | cache.                                                   |
++-------------------------------+----------------------------------------------------------+
+| **max_direct_iosz**           | Maximum size for non-buffered I/O request that CFS       |
+|                               | issues to a volume. CFS breaks larger application I/O    |
+|                               | requests into multiple requests of max_direct_iosz or    |
+|                               | fewer bytes.                                             |
++-------------------------------+----------------------------------------------------------+
+| **vol_maxio**                 | Maximum I/O request size that CVM issues to a disk.      |
+| **(default: 2,048 sectors)**  | CVM breaks larger requests into requests for vol_maxio   |
+|                               | or fewer sectors, and issues them synchronously in       |
+|                               | sequence                                                 |
+|                               | (Not set with vxtunefs)                                  |
++-------------------------------+----------------------------------------------------------+
+| **max_diskq**                 | Maximum number of bytes of data that CFS will hold in    |
+| **(default: 1 megabyte)**     | page cache for a single file. CFS delays execution of I/O|
+|                               | requests to the file until its cached data drops below   |
+|                               | max_diskq bytes                                          |
++-------------------------------+----------------------------------------------------------+
+| **write_throttle**            | Maximum number of write-cached pages per file that       |
+| **(default: 0)**              | CFS accumulates before flushing, independent of its      |
+|   (implying no limit)         | cache flush timer                                        |
++-------------------------------+----------------------------------------------------------+
+| **read_ahead**                | Disables read-ahead, or enables either single-stream or  |
+| (default: 1—detect            | multi-threaded sequential read detection                 |
+| sequential read-ahead)        |                                                          |
++-------------------------------+----------------------------------------------------------+
+| **read_nstream**              | read_nstream is the maximum number of read-ahead         |
+| (default: 1) and              | requests of size read_pref_io that CFS will allow to be  |
+| read_pref_io                  | outstanding simultaneously                               |
+| (default: 64 kilobytes)       |                                                          |
++-------------------------------+----------------------------------------------------------+
+| **write_nstream**             | write_nstream is the maximum number of coalesced         |
+| (default: 1) and              | write requests of size write_pref_io that CFS will allow |
+| write_pref_io                 | to be outstanding simultaneously                         |
+| (default: 64 kilobytes)       |                                                          |
++-------------------------------+----------------------------------------------------------+
+| **initial_extent_size**       | Minimum size of the first extent that CFS allocates to   |
+|                               | files whose storage space is not preallocated            |
++-------------------------------+----------------------------------------------------------+
+| **inode_aging_count**         | Maximum number of inodes to retain in an aging list after|
+| (default: 2,048)              | their files are deleted (data extents linked to aged     |
+|                               | inodes are also aged). Aged inodes and extents accelerate|
+|                               | restoration of deleted files from Storage Checkpoints    |
++-------------------------------+----------------------------------------------------------+
+| **inode_aging_size**          | Minimum size of a deleted file to qualify its inode for  |
+|                               | aging rather than immediate deallocation when its file is|
+|                               | deleted                                                  |
++-------------------------------+----------------------------------------------------------+
+| **max_seqio_extent_size**     | Maximum extent size that CFS will allocate to            | 
+|                               | sequntially written files                                |
++-------------------------------+----------------------------------------------------------+
+| **fcl_keeptime**              | Number of seconds, that the File Change Log (FCL)        |
+|                               | retains records. CFS purges FCL records that are older   |
+|                               | than fcl_keeptime and frees the extents they occupy      |
++-------------------------------+----------------------------------------------------------+  
+| **fcl_maxalloc**              | Maximum amount of space that CFS can allocate to the     |
+|                               | FCL. When space allocated to the FCL file reaches        |
+|                               | fcl_maxalloc, CFS purges the oldest FCL records and frees|
+|                               | the extents they occupy                                  |
++-------------------------------+----------------------------------------------------------+  
+| **fcl_ointerval**             | Minimum interval between open-related FCL records for    |
+| (default: 600 seconds)        | a single file. CFS suppresses FCL records that result    |
+|                               | from opening a file within fcl_ointerval seconds of the  |
+|                               | preceding open.                                          |
++-------------------------------+----------------------------------------------------------+  
+| **fcl_winterval**             | Minimum interval between write, extend, and truncate-    |
+| (default: 3,600 seconds)      | related FCL records for a single file. CFS suppresses FCL|
+|                               | records of these types that occur within fcl_winterval   |
+|                               | seconds of the preceding operation of one of these types.|
++-------------------------------+----------------------------------------------------------+ 
+

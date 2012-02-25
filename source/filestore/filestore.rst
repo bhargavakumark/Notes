@@ -6,5 +6,6 @@ FileStore
 
         *
         nfs/* 
+        backup/*
 
 
