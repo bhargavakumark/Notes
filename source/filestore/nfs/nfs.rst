@@ -1183,4 +1183,29 @@ The two major costs associated with a context switch are loading the address tra
 
 NFS server threads don't impose the "usual" context switching load on a system because all of the NFS server code is in the kernel. Instead of using a per-process context descriptor or a user-level process "slot" in the memory management unit, the nfsd threads use the kernel's address space mappings. This eliminates the address translation loading cost of a context switch.
 
+=======================================
+/proc/sys/sunrpc/tcp_slot_table_entries
+=======================================
+
+**tcp_slot_table_entries** sets the maximum number of (TCP) RPC requests that can be in flight. The default value is 16. You can increase the value, but that will also tie up more threads on the server.
+
+Managing NFS and NIS, 2nd Edition.  By Hal Stern, Mike Eisler and Ricardo Labiaga
+        **18.5. NFS async thread tuning.**
+        ...
+        If you are running eight NFS async threads on an NFS client, then the client
+        will generate eight NFS write requests at once when it is performing
+        a sequential write to a large file. The eight requests are handled by the NFS
+        async threads. ... when a Solaris process issues a new write requests while
+        all the NFS async threads are blocked waiting for a reply from the server,
+        the write request is queued in the kernel and the requesting process returns
+        successfully without blocking. The requesting process does not issue an RPC to
+        the NFS server itself, only the NFS async threads do. When an NFS async thread
+        RPC call completes, it proceeds to grab the next request from the queue and
+        sends a new RPC to the server. It may be necessary to reduce the number of NFS
+        requests if a server cannot keep pace with the incoming NFS write requests.
+
+When a client mounts a NFS share, a sunrpc xprt socket is established. Both the client and server initialise their sunrpc xprt socket, with **tcp_slot_table_entries**. Once a xprt socket is established, changing the proc variables does not affect any already mounted shares. Once the value of **tcp_slot_table_entries** has been changed, the nfs share should be unmounted/mounted again.
+
+Similar behaviour is expected for **udp_slot_table_entries**
+
 
