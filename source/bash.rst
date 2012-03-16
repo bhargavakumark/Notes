@@ -3,6 +3,8 @@ Bash
 
 .. contents::
 
+.. highlight:: bash
+
 References
 ----------
 Advanced Bash Scripting Guide
@@ -192,6 +194,167 @@ No spaces allowed within the braces unless the spaces are quoted or escaped.
       echo "What kind of dictionary are you using, anyhow?"
     fi
 
+read
+----
+
+::
+
+	while IFS=: read name passwd uid gid fullname ignore
+	do
+	  echo "$name ($fullname)"
+	done </etc/passwd   # I/O redirection.
+
+However, as Bjön Eriksson shows: Problems reading from a pipe
+
+::
+
+	### shopt -s lastpipe
+
+	last="(null)"
+	cat $0 |
+	while read line
+	do
+	    echo "{$line}"
+	    last=$line
+	done
+
+	echo
+	echo "++++++++++++++++++++++"
+	printf "\nAll done, last: $last\n" #  The output of this line
+					   #+ changes if you uncomment line 5.
+					   #  (Bash, version -ge 4.2 required.)
+
+	exit 0  # End of code.
+		# (Partial) output of script follows.
+		# The 'echo' supplies extra brackets.
+
+	#############################################
+
+	./readpipe.sh 
+
+	{#!/bin/sh}
+	{last="(null)"}
+	{cat $0 |}
+	{while read line}
+	{do}
+	{echo "{$line}"}
+	{last=$line}
+	{done}
+	{printf "nAll done, last: $lastn"}
+
+
+	All done, last: (null)
+
+	The variable (last) is set within the loop/subshell
+	but its value does not persist outside the loop.	
+
+eval
+----
+
+::
+
+    eval arg1 [arg2] ... [argN]
+
+    Combines the arguments in an expression or list of expressions and evaluates them. Any variables within the expression are expanded. The net result is to convert a string into a command.
+
+    Tip	
+
+    The eval command can be used for code generation from the command-line or within a script.
+
+    bash$ command_string="ps ax"
+    bash$ process="ps ax"
+    bash$ eval "$command_string" | grep "$process"
+    26973 pts/3    R+     0:00 grep --color ps ax
+     26974 pts/3    R+     0:00 ps ax
+	      
+
+Each invocation of eval forces a re-evaluation of its arguments.
+
+::
+
+    a='$b'
+    b='$c'
+    c=d
+
+    echo $a             # $b
+                        # First level.
+    eval echo $a        # $c
+                        # Second level.
+    eval eval echo $a   # d
+                        # Third level.
+
+    # Thank you, E. Choroba.
+
+set
+---
+
+The set command changes the value of internal script variables/options. One use for this is to toggle option flags which help determine the behavior of the script. Another application for it is to reset the positional parameters that a script sees as the result of a command (set `command`). The script can then parse the fields of the command output.
+
+::
+
+	set `uname -a` # Sets the positional parameters to the output of the command `uname -a`
+
+Invoking set without any options or arguments simply lists all the environmental and other variables that have been initialized.
+
+unset
+-----
+
+The unset command deletes a shell variable, effectively setting it to null. Note that this command does not affect positional parameters.
+
+wait
+----
+Suspend script execution until all jobs running in background have terminated, or until the job number or process ID specified as an option terminates. Returns the exit status of waited-for command.
+
+You may use the wait command to prevent a script from exiting before a background job finishes executing (this would create a dreaded orphan process).
+
+Optionally, wait can take a job identifier as an argument, for example, wait%1 or wait $PPID. [1] See the job id table.
+
+find
+----
+
+-exec COMMAND \;
+	Carries out COMMAND on each file that find matches. The command sequence terminates with ; (the ";" is escaped to make certain the shell passes it to find literally, without interpreting it as a special character).
+
+::
+
+    bash$ find ~/ -name '*.txt'
+    /home/bozo/.kde/share/apps/karm/karmdata.txt
+     /home/bozo/misc/irmeyc.txt
+     /home/bozo/test-scripts/1.txt
+	      
+
+If COMMAND contains {}, then find substitutes the full path name of the selected file for "{}".
+
+::
+
+    find ~/ -name 'core*' -exec rm {} \;
+    # Removes all core dump files from user's home directory.
+
+xargs
+-----
+A filter for feeding arguments to a command, and also a tool for assembling the commands themselves. It breaks a data stream into small enough chunks for filters and commands to process.
+
+**ls | xargs -p -l gzip** gzips every file in current directory, one at a time, prompting before each operation.
+
+An interesting xargs option is -n NN, which limits to NN the number of arguments passed.
+	**ls | xargs -n 8** echo lists the files in the current directory in 8 columns.
+
+Another useful option is -0, in combination with find -print0 or grep -lZ. This allows handling arguments containing whitespace or quotes.
+	**find / -type f -print0 | xargs -0 grep -liwZ GUI | xargs -0 rm -f**
+
+The -P option to xargs permits running processes in parallel. This speeds up execution in a machine with a multicore CPU.
+
+As in find, a **curly bracket pair** serves as a placeholder for replacement text.
+
+expand, unexpand
+----------------
+The expand filter converts tabs to spaces. It is often used in a pipe.
+
+The unexpand filter converts spaces to tabs. This reverses the effect of expand.
+
+whereis
+-------
+Similar to which, above, whereis command gives the full path to "command," but also to its manpage.
 
 String Manuipulation
 --------------------
@@ -201,6 +364,7 @@ String Length
 =============
 
 ::
+
 	${#string}
 
 ===================================================
@@ -941,5 +1105,679 @@ Anyone who attempts to generate random numbers by deterministic means is, of cou
 
 $RANDOM is an internal Bash function (not a constant) that returns a pseudorandom [1] integer in the range 0 - 32767. It should not be used to generate an encryption key.
 
+
+I/O Redirection
+---------------
+
+::
+
+   1>filename
+      # Redirect stdout to file "filename."
+   1>>filename
+      # Redirect and append stdout to file "filename."
+   2>filename
+      # Redirect stderr to file "filename."
+   2>>filename
+      # Redirect and append stderr to file "filename."
+   &>filename
+      # Redirect both stdout and stderr to file "filename."
+      # This operator is now functional, as of Bash 4, final release.
+
+   M>N
+     # "M" is a file descriptor, which defaults to 1, if not explicitly set.
+     # "N" is a filename.
+     # File descriptor "M" is redirect to file "N."
+   M>&N
+     # "M" is a file descriptor, which defaults to 1, if not set.
+     # "N" is another file descriptor.
+
+
+   0< FILENAME
+    < FILENAME
+      # Accept input from a file.
+      # Companion command to ">", and often used in combination with it.
+      #
+      # grep search-word <filename
+
+      exec 3<> File             # Open "File" and assign fd 3 to it.
+      read -n 4 <&3             # Read only 4 characters.
+      echo -n . >&3             # Write a decimal point there.
+      exec 3>&-                 # Close fd 3.
+
+Closing File Descriptors
+
+::
+
+	n<&-
+	    Close input file descriptor n.
+	0<&-, <&-
+	    Close stdin.
+	n>&-
+	    Close output file descriptor n.
+	1>&-, >&-
+	    Close stdout.
+
+Redirecting stdin using exec
+
+::
+
+	#!/bin/bash
+	# Redirecting stdin using 'exec'.
+
+
+	exec 6<&0          # Link file descriptor #6 with stdin.
+			   # Saves stdin.
+
+	exec < data-file   # stdin replaced by file "data-file"
+
+	exec 0<&6 6<&-
+	#  Now restore stdin from fd #6, where it had been saved,
+	#+ and close fd #6 ( 6<&- ) to free it for other processes to use.
+	#
+	# <&6 6<&-    also works.
+
+exec N > filename affects the entire script or current shell. Redirection in the PID of the script or shell from that point on has changed. However . . .
+
+N > filename affects only the newly-forked process, not the entire script or shell.
+
+Thank you, Ahmed Darwish, for pointing this out.
+
+Process Substituion
+-------------------
+Process substitution feeds the output of a process (or processes) into the stdin of another process.
+
+Template
+
+Command list enclosed within parentheses
+* >(command_list)
+* <(command_list)
+
+Process substitution uses /dev/fd/<n> files to send the results of the process(es) within parentheses to another process. [1]
+
+Caution	: There is no space between the the "<" or ">" and the parentheses. Space there would give an error message.
+
+.. code-block:: bash
+
+	bash$ echo >(true)
+	/dev/fd/63
+
+	bash$ echo <(true)
+	/dev/fd/63
+
+	bash$ echo >(true) <(true)
+	/dev/fd/63 /dev/fd/62
+
+
+
+	bash$ wc <(cat /usr/share/dict/linux.words)
+	 483523  483523 4992010 /dev/fd/63
+
+	bash$ grep script /usr/share/dict/linux.words | wc
+	    262     262    3601
+
+	bash$ wc <(grep script /usr/share/dict/linux.words)
+	    262     262    3601 /dev/fd/63
+
+Bash creates a pipe with two file descriptors, --fIn and fOut--. The stdin of true connects to fOut (dup2(fOut, 0)), then Bash passes a /dev/fd/fIn argument to echo. On systems lacking /dev/fd/<n> files, Bash may use temporary files. (Thanks, S.C.) 
+
+Process substitution can compare the output of two different commands, or even the output of different options to the same command.
+
+.. code-block:: bash
+
+	bash$ comm <(ls -l) <(ls -al)
+	total 12
+	-rw-rw-r--    1 bozo bozo       78 Mar 10 12:58 File0
+	-rw-rw-r--    1 bozo bozo       42 Mar 10 12:58 File2
+	-rw-rw-r--    1 bozo bozo      103 Mar 10 12:58 t2.sh
+		total 20
+		drwxrwxrwx    2 bozo bozo     4096 Mar 10 18:10 .
+		drwx------   72 bozo bozo     4096 Mar 10 17:58 ..
+		-rw-rw-r--    1 bozo bozo       78 Mar 10 12:58 File0
+		-rw-rw-r--    1 bozo bozo       42 Mar 10 12:58 File2
+		-rw-rw-r--    1 bozo bozo      103 Mar 10 12:58 t2.sh
+
+.. code-block:: bash
+
+	sort -k 9 <(ls -l /bin) <(ls -l /usr/bin) <(ls -l /usr/X11R6/bin)
+	# Lists all the files in the 3 main 'bin' directories, and sorts by filename.
+	# Note that three (count 'em) distinct commands are fed to 'sort'.
+
+	 
+	diff <(command1) <(command2)    # Gives difference in command output.
+
+======================================
+Code block redirection without forking
+======================================
+
+.. code-block:: bash
+
+	#!/bin/bash
+	# wr-ps.bash: while-read loop with process substitution.
+
+	# This example contributed by Tomas Pospisek.
+	# (Heavily edited by the ABS Guide author.)
+
+	echo
+
+	echo "random input" | while read i
+	do
+	  global=3D": Not available outside the loop."
+	  # ... because it runs in a subshell.
+	done
+
+	echo "\$global (from outside the subprocess) = $global"
+	# $global (from outside the subprocess) =
+
+	echo; echo "--"; echo
+
+	while read i
+	do
+	  echo $i
+	  global=3D": Available outside the loop."
+	  # ... because it does not run in a subshell.
+	done < <( echo "random input" )
+	#    ^ ^
+
+	echo "\$global (using process substitution) = $global"
+	# Random input
+	# $global (using process substitution) = 3D: Available outside the loop.
+
+Arrays
+------
+
+==================
+Simple array usage
+==================
+
+.. code-block:: bash
+
+	#!/bin/bash
+
+
+	area[11]=23
+	area[13]=37
+	area[51]=UFOs
+
+	#  Array members need not be consecutive or contiguous.
+
+::
+
+	# Another way of assigning array variables...
+	# array_name=( XXX YYY ZZZ ... )
+
+	area2=( zero one two three four )
+
+	# Yet another way of assigning array variables...
+	# array_name=([xx]=XXX [yy]=YYY ...)
+
+	area3=([17]=seventeen [24]=twenty-four)
+
+	base64_charset=( {A..Z} {a..z} {0..9} + / = )
+		       #  Using extended brace expansion
+		       #+ to initialize the elements of the array.                
+		       #  Excerpted from vladz's "base64.sh" script
+		       #+ in the "Contributed Scripts" appendix.
+
+================
+Basic Operations
+================
+Bash permits array operations on variables, even if the variables are not explicitly declared as arrays.
+
+::
+
+	string=abcABC123ABCabc
+	echo ${string[@]}               # abcABC123ABCabc
+	echo ${string[*]}               # abcABC123ABCabc 
+	echo ${string[0]}               # abcABC123ABCabc
+	echo ${string[1]}               # No output!
+					# Why?
+	echo ${#string[@]}              # 1
+					# One element in the array.
+					# The string itself.
+
+	# Thank you, Michael Zick, for pointing this out.
+
+Various Array operations
+
+::
+
+	echo ${array[0]}       #  zero
+	echo ${array:0}        #  zero
+			       #  Parameter expansion of first element,
+			       #+ starting at position # 0 (1st character).
+	echo ${array:1}        #  ero
+			       #  Parameter expansion of first element,
+			       #+ starting at position # 1 (2nd character).
+
+	echo "--------------"
+
+	echo ${#array[0]}      #  4
+			       #  Length of first element of array.
+	echo ${#array}         #  4
+			       #  Length of first element of array.
+			       #  (Alternate notation)
+
+	echo ${#array[1]}      #  3
+			       #  Length of second element of array.
+			       #  Arrays in Bash have zero-based indexing.
+
+	echo ${#array[*]}      #  6
+			       #  Number of elements in array.
+	echo ${#array[@]}      #  6
+			       #  Number of elements in array.
+
+	# The ${!array[@]} operator, which expands to all the indices of a given array.
+	for i in ${!Array[@]}
+	do
+	  echo ${Array[i]} # element-zero
+			   # element-one
+			   # element-two
+			   # element-three
+			   #
+			   # All the elements in Array.
+	done
+
+===========================
+String operations on arrays
+===========================
+
+::
+
+	#!/bin/bash
+	# array-strops.sh: String operations on arrays.
+
+	# Script by Michael Zick.
+	# Used in ABS Guide with permission.
+	# Fixups: 05 May 08, 04 Aug 08.
+
+	#  In general, any string operation using the ${name ... } notation
+	#+ can be applied to all string elements in an array,
+	#+ with the ${name[@] ... } or ${name[*] ...} notation.
+
+
+	arrayZ=( one two three four five five )
+
+	echo
+
+	# Trailing Substring Extraction
+	echo ${arrayZ[@]:0}     # one two three four five five
+	#                ^        All elements.
+
+	echo ${arrayZ[@]:1}     # two three four five five
+	#                ^        All elements following element[0].
+
+	echo ${arrayZ[@]:1:2}   # two three
+	#                  ^      Only the two elements after element[0].
+
+	echo "---------"
+
+=================
+Substring Removal
+=================
+
+::
+
+	# Removes shortest match from front of string(s).
+
+	echo ${arrayZ[@]#f*r}   # one two three five five
+	#               ^       # Applied to all elements of the array.
+				# Matches "four" and removes it.
+
+	# Longest match from front of string(s)
+	echo ${arrayZ[@]##t*e}  # one two four five five
+	#               ^^      # Applied to all elements of the array.
+				# Matches "three" and removes it.
+
+	# Shortest match from back of string(s)
+	echo ${arrayZ[@]%h*e}   # one two t four five five
+	#               ^       # Applied to all elements of the array.
+				# Matches "hree" and removes it.
+
+	# Longest match from back of string(s)
+	echo ${arrayZ[@]%%t*e}  # one two four five five
+	#               ^^      # Applied to all elements of the array.
+				# Matches "three" and removes it.
+
+=====================
+Substring Replacement
+=====================
+
+::
+
+	# Replace first occurrence of substring with replacement.
+	echo ${arrayZ[@]/fiv/XYZ}   # one two three four XYZe XYZe
+	#               ^           # Applied to all elements of the array.
+
+	# Replace all occurrences of substring.
+	echo ${arrayZ[@]//iv/YY}    # one two three four fYYe fYYe
+				    # Applied to all elements of the array.
+
+	# Delete all occurrences of substring.
+	# Not specifing a replacement defaults to 'delete' ...
+	echo ${arrayZ[@]//fi/}      # one two three four ve ve
+	#               ^^          # Applied to all elements of the array.
+
+	# Replace front-end occurrences of substring.
+	echo ${arrayZ[@]/#fi/XY}    # one two three four XYve XYve
+	#                ^          # Applied to all elements of the array.
+
+	# Replace back-end occurrences of substring.
+	echo ${arrayZ[@]/%ve/ZZ}    # one two three four fiZZ fiZZ
+	#                ^          # Applied to all elements of the array.
+
+	echo ${arrayZ[@]/%o/XX}     # one twXX three four five five
+	#                ^          # Why?
+
+=======================================
+unset/Remove array or elements of array
+=======================================
+
+::
+
+	# The "unset" command deletes elements of an array, or entire array.
+	unset colors[1]              # Remove 2nd element of array.
+				     # Same effect as   colors[1]=
+	echo  ${colors[@]}           # List array again, missing 2nd element.
+
+	unset colors                 # Delete entire array.
+				     #  unset colors[*] and
+				     #+ unset colors[@] also work.
+
+======================================
+Extending/Inserting/Removing an Array
+======================================
+
+::
+
+	array0[${#array0[*]}]="new2"
+
+	# When extended as above, arrays are 'stacks' ...
+	# Above is the 'push' ...
+	# The stack 'height' is:
+	height=${#array2[@]}
+	echo
+	echo "Stack height for array2 = $height"
+
+	# The 'pop' is:
+	unset array2[${#array2[@]}-1]   #  Arrays are zero-based,
+	height=${#array2[@]}            #+ which means first element has index 0.
+	echo
+	echo "POP"
+	echo "New stack height for array2 = $height"
+
+	# List only 2nd and 3rd elements of array0.
+	from=1		    # Zero-based numbering.
+	to=2
+	array3=( ${array0[@]:1:2} )
+
+================
+Copying an array
+================
+
+::
+
+	array2=( "${array1[@]}" )
+	# or
+	array2="${array1[@]}"
+	#
+	#  However, this fails with "sparse" arrays,
+	#+ arrays with holes (missing elements) in them,
+	#+ as Jochen DeSmet points out.
+
+====================
+Concatenating arrays
+====================
+
+::
+
+	dest=( ${array1[@]} ${array2[@]} )
+
+===============================================
+Embedded Arrays, Hashes and Indirect References
+===============================================
+
+::
+
+	#!/bin/bash
+	# embedded-arrays.sh
+	# Embedded arrays and indirect references.
+
+	# This script by Dennis Leeuw.
+	# Used with permission.
+	# Modified by document author.
+
+
+	ARRAY1=(
+		VAR1_1=value11
+		VAR1_2=value12
+		VAR1_3=value13
+	)
+
+	ARRAY2=(
+		VARIABLE="test"
+		STRING="VAR1=value1 VAR2=value2 VAR3=value3"
+		ARRAY21=${ARRAY1[*]}
+	)       # Embed ARRAY1 within this second array.
+
+	function print () {
+		OLD_IFS="$IFS"
+		IFS=$'\n'       #  To print each array element
+				#+ on a separate line.
+		TEST1="ARRAY2[*]"
+		local ${!TEST1} # See what happens if you delete this line.
+		#  Indirect reference.
+		#  This makes the components of $TEST1
+		#+ accessible to this function.
+
+
+		#  Let's see what we've got so far.
+		echo
+		echo "\$TEST1 = $TEST1"       #  Just the name of the variable.
+		echo; echo
+		echo "{\$TEST1} = ${!TEST1}"  #  Contents of the variable.
+					      #  That's what an indirect
+					      #+ reference does.
+		echo
+		echo "-------------------------------------------"; echo
+		echo
+
+
+		# Print variable
+		echo "Variable VARIABLE: $VARIABLE"
+		
+		# Print a string element
+		IFS="$OLD_IFS"
+		TEST2="STRING[*]"
+		local ${!TEST2}      # Indirect reference (as above).
+		echo "String element VAR2: $VAR2 from STRING"
+
+		# Print an array element
+		TEST2="ARRAY21[*]"
+		local ${!TEST2}      # Indirect reference (as above).
+		echo "Array element VAR1_1: $VAR1_1 from ARRAY21"
+	}
+
+	print
+	echo
+
+	exit 0
+
+	#   As the author of the script notes,
+	#+ "you can easily expand it to create named-hashes in bash."
+	#   (Difficult) exercise for the reader: implement this.
+
+============================
+Passing and returning arrays
+============================
+
+::
+
+	#!/bin/bash
+	# array-function.sh: Passing an array to a function and ...
+	#                   "returning" an array from a function
+
+
+	Pass_Array ()
+	{
+	  local passed_array   # Local variable!
+	  passed_array=( `echo "$1"` )
+	  echo "${passed_array[@]}"
+	  #  List all the elements of the new array
+	  #+ declared and set within the function.
+	}
+
+
+	original_array=( element1 element2 element3 element4 element5 )
+
+	echo
+	echo "original_array = ${original_array[@]}"
+	#                      List all elements of original array.
+
+
+	# This is the trick that permits passing an array to a function.
+	# **********************************
+	argument=`echo ${original_array[@]}`
+	# **********************************
+	#  Pack a variable
+	#+ with all the space-separated elements of the original array.
+	#
+	# Attempting to just pass the array itself will not work.
+
+
+	# This is the trick that allows grabbing an array as a "return value".
+	# *****************************************
+	returned_array=( `Pass_Array "$argument"` )
+	# *****************************************
+	# Assign 'echoed' output of function to array variable.
+
+	echo "returned_array = ${returned_array[@]}"
+
+Indirect Reference
+------------------
+
+The actual notation is \$$var, usually preceded by an eval (and sometimes an echo). This is called an indirect reference.
+
+::
+
+	G=letter_of_alphabet   # Variable "a" holds the name of another variable.
+	letter_of_alphabet=z
+
+	echo
+
+	# Direct reference.
+	echo "a = $a"          # a = letter_of_alphabet
+
+	# Indirect reference.
+	  eval a=\$$a
+
+	echo "Now a = ${!a}"    # Indirect reference.
+	#  The ${!variable} notation is more intuitive than the old
+	#+ eval var1=\$$var2
+	# Available in which bash versions ?
+
+
+Trapping Signals
+----------------
+
+Specifies an action on receipt of a signal; also useful for debugging. 
+
+A simple instance:
+
+::
+
+	trap '' 2
+	# Ignore interrupt 2 (Control-C), with no action specified. 
+
+	trap 'echo "Control-C disabled."' 2
+	# Message when Control-C pressed.
+
+
+Newer Bash features
+-------------------
+
+The ${!array[@]} operator, which expands to all the indices of a given array.
+
+::
+
+	for i in ${!Array[@]}
+	do
+	  echo ${Array[i]} # element-zero
+			   # element-one
+			   # element-two
+			   # element-three
+			   #
+			   # All the elements in Array.
+	done
+
+The =~ Regular Expression matching operator within a double brackets test expression. (Perl has a similar operator.)
+
+::
+
+	#!/bin/bash
+
+	variable="This is a fine mess."
+
+	echo "$variable"
+
+	# Regex matching with =~ operator within [[ double brackets ]].
+	if [[ "$variable" =~ T.........fin*es* ]]
+	# NOTE: As of version 3.2 of Bash, expression to match no longer quoted.
+	then
+	  echo "match found"
+	      # match found
+	fi
+
+The += operator is now permitted in in places where previously only the = assignment operator was recognized.
+
+Here, += functions as a string concatenation operator. Note that its behavior in this particular context is different than within a let construct.
+
+::
+
+	a=1
+	echo $a        # 1
+
+	a+=5           # Won't work under versions of Bash earlier than 3.1.
+	echo $a        # 15
+
+	a+=Hello
+	echo $a        # 15Hello
+
+Commenting out a block of code
+
+::
+
+	#!/bin/bash
+	# commentblock.sh
+
+	: <<COMMENTBLOCK
+	echo "This line will not echo."
+	This is a comment line missing the "#" prefix.
+	This is another comment line missing the "#" prefix.
+
+	&*@!!++=
+	The above line will cause no error message,
+	because the Bash interpreter will ignore it.
+	COMMENTBLOCK
+
+	echo "Exit value of above \"COMMENTBLOCK\" is $?."   # 0
+	# No error shown.
+	echo
+
+
+Exit Codes With Special Meanings
+--------------------------------
+
+================	==========================================================	=========================================================================================================
+Exit Code Number	Meaning								Example			Comments
+================	==========================================================	=========================================================================================================
+1			Catchall for general errors					let "var1 = 1/0"	Miscellaneous errors, such as "divide by zero" and other impermissible operations
+2			Misuse of shell builtins (according to Bash documentation)	empty_function() {}	Seldom seen, usually defaults to exit code 1
+126			Command invoked cannot execute								Permission problem or command is not an executable
+127			"command not found"						illegal_command		Possible problem with $PATH or a typo
+128			Invalid argument to exit					exit 3.14159		exit takes only integer args in the range 0 - 255 (see first footnote)
+128+n			Fatal error signal "n"						kill -9 $PPID of script	$? returns 137 (128 + 9)
+130			Script terminated by Control-C								Control-C is fatal error signal 2, (130 = 128 + 2, see above)
+255*			Exit status out of range								exit -1	exit takes only integer args in the range 0 - 255
+================	==========================================================	=========================================================================================================
 
 
