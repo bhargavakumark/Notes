@@ -3,6 +3,8 @@ ip addr
 
 .. contents::
 
+.. highlight:: bash   
+
 show : Displaying IP information with ip address
 ------------------------------------------------
 
@@ -111,4 +113,44 @@ flush : Removing all IPs on an interface with ip address flush
         2: eth0: <BROADCAST,MULTICAST,UP> mtu 1500 qdisc pfifo_fast qlen 100
             link/ether 00:80:c8:f8:4a:51 brd ff:ff:ff:ff:ff:ff
                           
+ip addr v6
+----------
+
+==========
+References
+==========
+http://tldp.org/HOWTO/Linux+IPv6-HOWTO/chapter-configuration-address.html
+
+=================
+Show IPv6 address
+=================
+
+::
+
+        # ip -6 addr show dev <interface>
+        2: eth0: <BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc pfifo_ fast qlen 100
+        inet6 fe80::210:a4ff:fee3:9566/10 scope link
+        inet6 2001:0db8:0:f101::1/64 scope global
+        inet6 fec0:0:0:f101::1/64 scope site 
+
+======================
+Adding an IPv6 address
+======================
+
+::
+
+        # ip -6 addr add <ipv6address>/<prefixlength> dev <interface> 
+
+        # ip -6 addr add 2001:0db8:0:f101::1/64 dev eth0 
+
+========================
+Deleting an IPv6 address
+========================
+
+::
+
+        # /sbin/ip -6 addr del <ipv6address>/<prefixlength> dev <interface> 
+
+        # /sbin/ip -6 addr del 2001:0db8:0:f101::1/64 dev eth0 
+
 

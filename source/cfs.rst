@@ -3,6 +3,10 @@ CFS
 
 .. contents::
 
+Introduction
+------------
+
+*    journaling, extent-based filesystem
 *    64-bit fully POSIX-compliant cluster file system
 *    FS upto 256 TB of storage
 *    1 billion files
@@ -197,6 +201,8 @@ The third type of per-instance resource that CFS controls is that whose per-inst
 *   **User quota files**. During operation, the CFS instance that controls the master quota file delegates the right to allocate quota-controlled space to other instances on request. Each CFS instance uses its own quota file to record changes in space consumption as it allocates and frees space. The primary CFS instance reconciles per-instance quota file contents with the master each time a file system is mounted or unmounted, each time quota enforcement is enabled or disabled, and whenever the instance that owns the master quota file cannot delegate quota-controlled space without exceeding the user or group quota. Immediately after reconciliation, all per-instance quota file records contain zeros
 *   **Current usage tables**. These files track the space occupied by filesets. As it does with quota files, CFS reconciles them when a file system is mounted or unmounted. When an instance increases or decreases the amount of storage used by a fileset, it adjusts its own current usage table to reflect the increase or decrease in space used by the fileset and triggers background reconciliation of the current usage table files with the master 
 *   **Link count tables**. CFS instances use these files to record changes in the number of file inodes linked to an extended attribute inode. Each time an instance creates or removes a link, it increments or decrements the extended attribute inode’s link count in its link count table. A file system’s primary instance reconciles per-instance link count table contents with the master file whenever the file system is mounted or unmounted, when a snapshot is created, and in addition, periodically (approximately every second). When reconciliation results in an attribute inode having zero links, CFS marks it for removal. Immediately after reconciliation, all per-instance link count tables contain zeros
+
+
 
 CFS Tunables
 ------------
