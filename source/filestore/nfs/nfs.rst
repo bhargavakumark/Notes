@@ -908,6 +908,25 @@ NFS server only supports posix acls, i.e, system.posix_acl_access and system.pos
         2241         } 
         2242        
 
+=======================================
+Enable NFS Debugging in /proc variables
+=======================================
+
+To enable logging of all operations being received by NFS server
+
+::
+	
+	echo 16 > /proc/sys/sunrpc/nfsd_debug
+
+To enable logging of all RPCs being queued and how they are being transmitted
+
+::
+
+	echo 3 > /proc/sys/sunrpc/rpc_debug
+
+	
+
+
 NFS Ethereal
 ------------
 ethereal has 2 types of filters.
