@@ -234,12 +234,12 @@ CFS Tunables
 +-------------------------------+----------------------------------------------------------+
 | **read_nstream**              | read_nstream is the maximum number of read-ahead         |
 | (default: 1) and              | requests of size read_pref_io that CFS will allow to be  |
-| read_pref_io                  | outstanding simultaneously                               |
+| **read_pref_io**              | outstanding simultaneously                               |
 | (default: 64 kilobytes)       |                                                          |
 +-------------------------------+----------------------------------------------------------+
 | **write_nstream**             | write_nstream is the maximum number of coalesced         |
 | (default: 1) and              | write requests of size write_pref_io that CFS will allow |
-| write_pref_io                 | to be outstanding simultaneously                         |
+| **write_pref_io**             | to be outstanding simultaneously                         |
 | (default: 64 kilobytes)       |                                                          |
 +-------------------------------+----------------------------------------------------------+
 | **initial_extent_size**       | Minimum size of the first extent that CFS allocates to   |
@@ -276,4 +276,72 @@ CFS Tunables
 |                               | records of these types that occur within fcl_winterval   |
 |                               | seconds of the preceding operation of one of these types.|
 +-------------------------------+----------------------------------------------------------+ 
+
+======================
+discovered_direct_iosz
+======================
+
+I/O request size above which CFS transfers data directly to and from application buffers, without copying to page cache.
+
+The default value on most versions and configuration is 256K. So any write requests larger than that are taken as direct IO and will not involve caches. As there are no caches involved it can reduce the CPU and memory overhead during copy. But since there will only be one IO queued to the disk at a time, it cannot saturate the link. But in a real system this may not be the case and there could be multiple such process writing to a file, and if there are a lot of such processes 
+
+If you are running a single dd process with 12M write size, which is larger that discovered_direct_iosz, it would be converted to direct IO and would get 225 MB/sec
+
+.. code-block:: bash
+
+	dellpe12_01:~ # dd if=/dev/zero of=/vx/fs_fc/testfile5 bs=12M count=100
+	100+0 records in
+	100+0 records out
+	1258291200 bytes (1.3 GB) copied, 5.58075 s, 225 MB/s
+
+If there are multiple such processes writing (say 3) you will be to keep the device somewhat busy, and generate 350 MB/sec 
+
+.. code-block:: bash
+
+	dellpe12_01:~ # dd if=/dev/zero of=/vx/fs_fc/testfile5 bs=12M count=100 & dd if=/dev/zero of=/vx/fs_fc/testfile6 bs=12M count=100 & dd if=/dev/zero of=/vx/fs_fc/testfile7 bs=12M count=100
+	[1] 16652
+	[2] 16653
+	100+0 records in
+	100+0 records out
+	1258291200 bytes (1.3 GB) copied, 10.6814 s, 118 MB/s
+	dellpe12_01:~ # 100+0 records in
+	100+0 records out
+	100+0 records in
+	100+0 records out
+	1258291200 bytes (1.3 GB) copied, 10.9993 s, 114 MB/s
+	1258291200 bytes (1.3 GB) copied, 10.9377 s, 115 MB/s
+	dellpe12_01:~ # 
+	[1]-  Done                    dd if=/dev/zero of=/vx/fs_fc/testfile5 bs=12M count=100
+	[2]+  Done                    dd if=/dev/zero of=/vx/fs_fc/testfile6 bs=12M count=100
+	dellpe12_01:~ # 
+
+Increasing it to 6 threads can bring your device max utilisation
+
+.. code-block:: bash
+
+	VxVM50001         0.00     0.00    1.50  360.00    24.00 732250.50  2025.66    32.16   86.06   2.76  99.80
+
+	00+0 records in
+	100+0 records out
+	1258291200 bytes (1.3 GB) copied, 21.6047 s, 58.2 MB/s
+	100+0 records in
+	100+0 records out
+	1258291200 bytes (1.3 GB) copied, 21.6855 s, 58.0 MB/s
+	100+0 records in
+	100+0 records out
+	1258291200 bytes (1.3 GB) copied, 21.6854 s, 58.0 MB/s
+	[4]-  Done                    dd if=/dev/zero of=/vx/fs_fc/testfile8 bs=12M count=100
+	[5]+  Done                    dd if=/dev/zero of=/vx/fs_fc/testfile9 bs=12M count=100
+	dellpe12_01:~ # 100+0 records in
+	100+0 records out
+	1258291200 bytes (1.3 GB) copied, 21.7322 s, 57.9 MB/s
+	100+0 records in
+	100+0 records out
+	1258291200 bytes (1.3 GB) copied, 21.8413 s, 57.6 MB/s
+	100+0 records in
+	100+0 records out
+	1258291200 bytes (1.3 GB) copied, 21.9393 s, 57.4 MB/s
+	dellpe12_01:~ # 
+
+But it will never as good as cached writes, but they will use far less memory and CPU resource by avoiding cache copies
 
