@@ -1254,4 +1254,33 @@ From the sample output, lockd starts IPv6 but not rpcbind/nfsd/mountd. Rebooting
         udp        0      0 :::2049                 :::*                                
         udp        0      0 :::4045                 :::*                         
 
+NFS Known Issues
+----------------
+
+==================================
+ls -l hangs when writing to a file
+==================================
+
+.. code-block:: c
+
+        /*
+         * Flush out writes to the server in order to update c/mtime.
+         *
+         * Hold the i_mutex to suspend application writes temporarily;
+         * this prevents long-running writing applications from blocking
+         * nfs_wb_nocommit.
+         * /
+        if (S_ISREG(inode->i_mode)) {
+                mutex_lock(&inode->i_mutex);
+                nfs_wb_nocommit(inode);
+                mutex_unlock(&inode->i_mutex);
+        }
+
+As the comment says the getattr request is blocked until all writes are completed for the file. This is to ensure that once we do getattr we get the final time that should be seen by the user. Typically if a long dd ran then there would be pages in memory that have not been flushed. In case of local filesystem the inode has already been updated once the last write was done by the user (even though not flused to the disk yet). In case of NFS when even user has done his writes if he has not closed the file, then any request for getattr will wait till all write's are completed. If we return with a specific time now and when the writes get flushed then we would have a different mtime, which conflicts with the expected behaviour that once writes are completed the time reflected should be correct. Whether this is strictly required is questionable. 
+
+https://bugzilla.redhat.com/show_bug.cgi?id=469848
+
+It was fixed in some kernels to not wait for the writes to complete but seems to have been reverted back.
+
+
 
