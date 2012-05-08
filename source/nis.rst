@@ -38,3 +38,8 @@ Netgroups
 
         netgroup  (host,user,domain)  (host,user,domain) ..
 
+Links
+-----
+http://www.linuxtopia.org/online_books/opensuse_guides/opensuse11.1_reference_guide/sec_nis_server.html
+http://www.server-world.info/en/note?os=SUSE_Linux_Enterprise_Server_11&p=nis&f=2
+http://www.server-world.info/en/note?os=SUSE_Linux_Enterprise_Server_11&p=nis

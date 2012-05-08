@@ -5,6 +5,11 @@ RPM
 
 .. highlight:: bash   
 
+References
+----------
+
+http://www.idevelopment.info/data/Unix/Linux/LINUX_RPMCommands.shtml
+
 Extracing a rpm
 ---------------
 
