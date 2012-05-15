@@ -5,6 +5,11 @@ Perl
 
 .. highlight:: perl
 
+References
+----------
+
+- **Programming Perl** by **Larry Wall** second edition
+
 Perl Data Types
 ---------------
 
@@ -414,6 +419,14 @@ This function returns information about the stack of current subroutine calls. W
 	}
 
 Furthermore, when called from within the DB package, caller returns more detailed information: it sets the list variable @DB::args to be the arguments passed in the given stack frame.
+
+=======
+confess
+=======
+
+confess() is like die except that it prints out a stack backtrace. The error is reported at the line where
+
+confess() is invoked, not at a line in one of the calling routines.
 
 
 =======
@@ -1920,4 +1933,619 @@ The overall list is enclosed by parentheses, not brackets. That's because you're
 
 **$ref_to_LoL is a reference to an array, whereas @LoL is an array proper**.
 
+
+Packages
+--------
+
+Like the notion of "home", the notion of "package" is a bit nebulous. Packages are independent of files.  You can have many packages in a single file, or a single package that spans several files, just as your home could be one part of a larger building, if you live in an apartment, or could comprise several buildings, if your name happens to be Queen Elizabeth. But the usual size of a home is one building, and the usual size of a package is one file.
+
+Perl has some special help for people who want to put one package in one file, as long as you're willing to name the file with the same name as the package and give your file an extension of ".pm", which is short for "perl module".
+
+**package main** : The initial current package is **package main**, but at any time you can switch the current package to another one using the package declaration.
+
+**symbol table** : The current package determines which symbol table is used for name lookups (for names that aren't otherwise package-qualified). The notion of "current package" is both a compile-time and run-time concept.
+
+**Scope** : The scope of a package declaration is from the declaration itself through the end of the innermost enclosing block (or until another package declaration at the same level, which hides the earlier one).
+
+**qualifying** : You can refer to identifiers in other packages by prefixing ("qualifying") the identifier with the package name and a double colon: $Package::Variable. 
+
+If the package name is null, the main package is assumed.
+
+**Nested Packages** : Packages may be nested inside other packages: $OUTER::INNER::var. This implies nothing about the order of name lookups, however. There are no fallback symbol tables. All undeclared symbols are either local to the current package, or must be fully qualified from the outer package name down. For instance, there is nowhere within package OUTER that $INNER::var refers to $OUTER::INNER::var
+
+
+Only identifiers (names starting with letters or underscore) are stored in the current package's symbol table. All other symbols are kept in package main, including all the magical punctuation-only variables like $! and $_. In addition, the identifiers STDIN, STDOUT, STDERR, ARGV, ARGVOUT, ENV, INC, and SIG are forced to be in package main even when used for purposes other than their built-in ones.
+
+**package**
+	A package is a simple namespace management device, allowing two different parts of a Perl
+	program to have a (different) variable named $fred. These namespaces are managed with the
+	package declaration, described in Chapter 5, Packages, Modules, and Object Classes.
+	library
+
+**library**
+	A library is a set of subroutines for a particular purpose. Often the library declares itself a separate
+	package so that related variables and subroutines can be kept together, and so that they won't
+	interfere with other variables in your program. Generally, a library is placed in a separate file,
+	often ending in ".pl", and then pulled into the main program via require. (This mechanism has
+	largely been superseded by the module mechanism, so nowadays we often use the term "library" to
+	talk about the whole system of modules that come with Perl. See the title of this chapter, for
+	instance.)
+
+**module**
+	A module is a library that conforms to specific conventions, allowing the file to be brought in with
+	a use directive at compile time. Module filenames end in ".pm", because the use directive insists
+	on that. (It also translates the subpackage delimiter :: to whatever your subdirectory delimiter is;
+	it is / on UNIX.) Chapter 5 describes Perl modules in greater detail.
+
+**pragma**
+	A pragma is a module that affects the compilation phase of your program as well as the execution
+	phase. Think of them as hints to the compiler. Unlike modules, pragmas often (but not always)
+	limit the scope of their effects to the innermost enclosing block of your program. The names of
+	pragmas are by convention all lowercase.
+
+=============
+Symbol Tables
+=============
+
+The symbol table for a package happens to be stored in a hash whose name is the same as the package name with two colons appended. Likewise, the symbol table for the nested package we mentioned earlier is named %OUTER::INNER::. As it happens, the main symbol table contains all other top-level symbol tables, including itself, so %OUTER::INNER:: is also %main::OUTER::INNER::.
+
+Since package main is a top-level package, it contains a reference to itself, with the result that %main:: is the same as %main::main::, and **%main::main::main::**, and so on, ad infinitum. It's important to check for this special case if you write code to traverse all symbol tables.
+
+The keys in a symbol table hash are the identifiers of the symbols in the symbol table. The values in a symbol table hash are the corresponding typeglob values. So when you use the \*name typeglob notation, you're really just accessing a value in the hash that holds the current package's symbol table. 
+
+following have the same effect, although the first is potentially more efficient because it does the symbol table lookup at compile time:
+
+::
+
+	local *somesym = *main::variable;
+	local *somesym = $main::{"variable"};
+
+Since a package is a hash, you can look up the keys of the package, and hence all the variables of the package. Try this:
+
+::
+
+	foreach $symname (sort keys %main::) {
+		local *sym = $main::{$symname};
+		print "\$$symname is defined\n" if defined $sym;
+		print "\@$symname is defined\n" if defined @sym;
+		print "\%$symname is defined\n" if defined %sym;
+	}
+
+===================================================
+Package Constructors and Destructors: BEGIN and END
+===================================================
+
+Two special subroutine definitions that function as package constructors and destructors are the BEGIN and END routines. The sub is optional for these routines
+
+A **BEGIN** subroutine is executed as soon as possible, that is, the moment it is completely defined, even before the rest of the containing file is parsed. You may have multiple BEGIN blocks within a file - they will execute in order of definition. Because a BEGIN block executes immediately, it can pull in definitions of subroutines and such from other files in time to be visible during compilation of the rest of the file.
+
+An **END** subroutine, by contrast, is executed as late as possible, that is, when the interpreter is being exited, even if it is exiting as a result of a die function, or from an internally generated exception such as you'd get when you try to call an undefined function. 
+
+You may have multiple END blocks within a file -
+	they will execute in reverse order of definition; that is: last in, first out (LIFO). 
+
+Just as eval provides a way to get compilation behavior during run-time, so too BEGIN provides a way to get run-time behavior during compilation. But note that the compiler must execute BEGIN blocks even if you're just checking syntax with the -c switch. By symmetry, END blocks are also executed when syntax checking. Your END blocks should not assume that any or all of your main code ran
+
+=======
+Modules
+=======
+
+A module is just a reusable package that is defined in a library file whose name is the same as the name of the package (with a .pm on the end). A module may provide a mechanism for exporting some of its symbols into the symbol table of any other package using it.
+
+Most exporter modules rely on the customary exportation semantics supplied by the Exporter module. For example, to create an exporting module called Fred, create a file called Fred.pm and put this at the start of it:
+
+::
+
+	package Fred;
+	require Exporter;
+	@ISA = qw(Exporter);
+	@EXPORT = qw(func1 func2);
+	@EXPORT_OK = qw($sally @listabob %harry func3);
+
+Perl modules are included in your program by saying:
+
+::
+
+	use Module;
+	
+or:
+
+::
+
+	use Module LIST;
+
+This preloads Module at compile time, and then imports from it the symbols you've requested, either implicitly or explicitly. If you do not supply a list of symbols in a LIST, then the list from the module's @EXPORT array is used. (And if you do supply a LIST, all your symbols should be mentioned in either @EXPORT or @EXPORT_OK, or an error will result.) The two declarations above are exactly equivalent to:
+
+::
+
+	BEGIN {
+	require "Module.pm";
+	Module->import();
+	}
+
+or:
+
+::
+
+	BEGIN {
+	require "Module.pm";
+	Module->import(LIST);
+	}
+
+The **use** declaration (in any form) implies a BEGIN block, the module is loaded (and any executable initialization code in it run) as soon as the use declaration is compiled, before the rest of the file is compiled. This is how use is able to function as a pragma mechanism to change the compiler's behavior, and also how modules are able to declare subroutines that are then visible as (unqualified) list operators for the rest of the current file. If, on the other hand, you invoke require instead of use, you must explicitly qualify any invocation of routines within the required package.
+
+::
+
+	require Cwd;
+	# make Cwd:: accessible with qualification
+	$here = Cwd::getcwd();
+
+	use Cwd;
+	# import names from Cwd:: -- no qualification necessary
+	$here = getcwd();
+
+In general, use is recommended over require because you get your error messages sooner. But require is useful for pulling in modules lazily at run-time.
+
+
+if a module's name is, say, Text::Soundex, then its definition is actually found in the library file Text/Soundex.pm (or whatever the equivalent pathname is on your system).
+
+==============
+Perl's Objects
+==============
+
+Here are three simple definitions that you may find reassuring:
+- An object is simply a referenced thingy that happens to know which class it belongs to.
+- A class is simply a package that happens to provide methods to deal with objects.
+- A method is simply a subroutine that expects an object reference (or a package name, for class methods) as its first argument.  We'll cover these points in more depth now.
+
+===========
+Constructor
+===========
+
+A constructor is merely a subroutine that returns a reference to a thingy that it has blessed into a class, generally the class in which the subroutine is defined. The constructor does this using the built-in bless function, which marks a thingy as belonging to a particular class.
+
+::
+
+	sub new {
+		my $obref = {};		# ref to empty hash
+		bless $obref;		# make it an object in this class
+		return $obref;		# return it
+	}
+
+If you want your constructor method to be (usefully) inheritable, then you must use the two-argument form of bless.
+
+In Perl, methods execute in the context of the original base class rather than in the context of the derived class. For example, suppose you have a Polygon class that had a new() method as a constructor. This would work fine when called as Polygon->new(). But then you decide to also have a Square class, which inherits methods from the Polygon class. The only way for that constructor to build an object of the proper class when it is called as Square->new() is by using the two-argument form of bless, as in the following example:
+
+::
+
+	sub new {
+		my $class = shift;
+		my $self = {};
+		bless $self, $class;
+		$self->_initialize();
+		return $self;
+	}
+
+A constructor may re-bless a referenced object currently belonging to another class, but then the new class is responsible for all cleanup later. The previous blessing is forgotten, as an object may only belong to one class at a time.
+
+
+Perl objects are blessed. References are not. Thingies know which package they belong to.  References do not. 
+
+The bless operator simply uses the reference in order to find the thingy. Consider the following example:
+
+::
+
+	$a = {};	# generate reference to hash
+	$b = $a;	# reference assignment (shallow)
+	bless $b, Mountain;
+	bless $a, Fourteener;
+	print "\$b is a ", ref($b), "\n";
+
+This reports $b as being a member of class Fourteener, not a member of class Mountain, because the second blessing operates on the underlying thingy that $a refers to, not on the reference itself. Thus is the first blessing forgotten.
+
+===========================
+A Class Is Simply a Package
+===========================
+
+Perl doesn't provide any special syntax for class definitions. You just use a package as a class by putting method definitions into the class.
+
+Within each package a special array called **@ISA** tells Perl where else to look for a method if it can't find the method in that package. This is how Perl implements inheritance. Each element of the @ISA array is just the name of another package that happens to be used as a class.
+
+The packages are recursively searched (depth first) for missing methods, in the order that packages are mentioned in @ISA. This means that if you have two different packages (say, Mom and Dad) in a class's @ISA, Perl would first look for missing methods in Mom and all of her ancestor classes before going on to search through Dad and his ancestors. Classes accessible through @ISA are known as base classes of the current class, which is itself called the derived class.
+
+If a method isn't found but an **AUTOLOAD** routine is found, then that routine is called on behalf of the missing method, with that package's $AUTOLOAD variable set to the fully qualified method name.
+
+Perl classes do only method inheritance. Data inheritance is left up to the class itself. By and large, this is not a problem in Perl, because most classes model the attributes of their object using an anonymous hash.  All the object's data fields (termed "instance variables" in some languages) are contained within this anonymous hash instead of being part of the language itself
+
+=============
+Class methods
+=============
+
+A class method expects a class (package) name as its first argument. (The class name isn't blessed; it's just a string.) These methods provide functionality for the class as a whole, not for any individual object instance belonging to the class. Constructors are typically written as class methods. Many class methods simply ignore their first argument, since they already know what package they're in, and don't care what package they were invoked via.
+
+=======================
+Instance/object methods
+=======================
+
+An instance method expects an object reference[11] as its first argument. Typically it shifts the first argument into a private variable (often called $self or $this depending on the cultural biases of the programmer), and then it uses the variable as an ordinary reference:
+
+Despite being counterintuitive to object-oriented novices, it's a good idea not to check the type of object that caused the instance method to be invoked. If you do, it can get in the way of inheritance.
+
+===================
+Dual-nature methods
+===================
+
+Because there is no language-defined distinction between definitions of class methods and instance methods (nor arbitrary functions, for that matter), you could actually have the same method work for both purposes. It just has to check whether it was passed a reference or not.
+
+Here's an example of the two uses of such a method:
+
+::
+
+	$ob1 = StarKnight->new();
+	$luke = $ob1->new();
+
+	package StarKnight;
+	sub new {
+		my $self = shift;
+		my $type = ref($self) || $self;
+		return bless {}, $type;
+	}
+
+=================
+Method Invocation
+=================
+
+Perl supports two different syntactic forms for explicitly invoking class or instance methods. Unlike normal function calls, method calls always receive, as their first parameter, the appropriate class name or object reference upon which they were invoked.
+
+The first syntax form looks like this:
+
+::
+
+	METHOD CLASS_OR_INSTANCE LIST
+	$fred = find Critter "Fred";
+	display $fred 'Height', 'Weight';
+
+The second syntax form looks like this:
+
+::
+
+	CLASS_OR_INSTANCE->METHOD(LIST)
+	$fred = Critter->find("Fred");
+	$fred->display('Height', 'Weight');
+
+There may be occasions when you need to specify which class's method to use. In that case, you could call your method as an ordinary subroutine call, being sure to pass the requisite first argument explicitly:
+
+::
+
+	$fred = MyCritter::find("Critter", "Fred");
+	MyCritter::display($fred, 'Height', 'Weight');
+
+However, this does not do any inheritance. If you merely want to specify that Perl should start looking for a method in a particular package, use an ordinary method call, but qualify the method name with the package like this:
+
+::
+
+	$fred = Critter->MyCritter::find("Fred");
+	$fred->MyCritter::display('Height', 'Weight');
+
+
+If you're trying to control where the method search begins and you're executing in the class package itself, then you may use the SUPER pseudoclass, which says to start looking in your base class's @ISA list without having to explicitly name it:
+
+::
+
+	$self->SUPER::display('Height', 'Weight');
+
+The **SUPER** construct is meaningful only when used inside the class methods; while writers of class modules can employ SUPER in their own code, people who merely use class objects cannot.
+
+===========
+Destructors
+===========
+
+If you want to capture control just before the object is freed, you may define a DESTROY method in your class. It will automatically be called at the appropriate moment, and you can do any extra cleanup you desire.
+
+====================
+Using Tied Variables
+====================
+
+In older versions of Perl, a user could call dbmopen to tie a hash to a UNIX DBM file. Whenever the hash was accessed, the database file on disk (really just a hash, not a full relational database) would be magically read from or written to. In modern versions of Perl, you can bind any ordinary variable (scalar, array, or hash) to an implementation class by using tie. (The class may or may not implement a DBM file.) You can break this association with untie.
+
+==================
+Instance Variables
+==================
+
+An anonymous array or anonymous hash can be used to hold instance variables. (The hashes fare better in the face of inheritance.) We'll also show you some nice interactions with named parameters.
+
+::
+
+	package HashInstance;
+	sub new {
+		my $type = shift;
+		my %params = @_;
+		my $self = {};
+		$self->{High} = $params{High};
+		$self->{Low} = $params{Low};
+		return bless $self, $type;
+	}
+
+	package ArrayInstance;
+	sub new {
+		my $type   = shift;
+		my %params = @_;
+		my $self   = [];
+		$self->[0] = $params{Left};
+		$self->[1] = $params{Right};
+		return bless $self, $type;
+	}
+	package main;
+
+	$a = HashInstance->new( High => 42, Low => 11 );
+	print "High=$a->{High}\n";
+	print "Low=$a->{Low}\n";
+	$b = ArrayInstance->new( Left => 78, Right => 40 );
+	print "Left=$b->[0]\n";
+	print "Right=$b->[1]\n";
+
+This demonstrates how object references act like ordinary references if you use them like ordinary references, as you often do within the class definitions.
+
+-------------------------
+Scalar Instance Variables
+-------------------------
+
+An anonymous scalar can be used when only one instance variable is needed.
+
+::
+
+	package ScalarInstance;
+	sub new {
+		my $type = shift;
+		my $self;
+		$self = shift;
+		return bless \$self, $type;
+	}
+
+-----------------------------
+Instance Variable Inheritance
+-----------------------------
+
+Note that you're pretty much forced to use a hash if you want to do inheritance, since you can't have a reference to multiple types at the same time. A hash allows you to extend your object's little namespace in arbitrary directions, unlike an array, which can only be extended at the end. So, for example, your base class might use the first five elements of your array, but the various derived classes might start fighting over who owns the sixth element. So use a hash instead, like this:
+
+::
+
+	package Base;
+	sub new {
+		my $type = shift;
+		my $self = {};
+		$self->{buz} = 42;
+		return bless $self, $type;
+	}
+
+	package Derived;
+	@ISA = qw( Base );
+	sub new {
+		my $type = shift;
+		my $self = Base->new;
+		$self->{biz} = 11;
+		return bless $self, $type;
+	}
+
+	package main;
+	$a = Derived->new;
+	print "buz = ", $a->{buz}, "\n";
+	print "biz = ", $a->{biz}, "\n";
+
+======================================
+Containment (the "Has-a" Relationship)
+======================================
+
+The following demonstrates how one might implement the "contains" relationship between objects. This is closely related to the "uses" relationship we show later.
+
+::
+
+	package Inner;
+	sub new {
+		my $type = shift;
+		my $self = {};
+		$self->{buz} = 42;
+		return bless $self, $type;
+	}
+
+	package Outer;
+	sub new {
+		my $type = shift;
+		my $self = {};
+		$self->{Inner} = Inner->new;
+		$self->{biz} = 11;
+		return bless $self, $type;
+	}
+
+	package main;
+	$a = Outer->new;
+	print "buz = ", $a->{Inner}->{buz}, "\n";
+	print "biz = ", $a->{biz}, "\n";
+
+
+=============================
+Overriding Base Class Methods
+=============================
+
+::
+
+	package Buz;
+	sub goo { print "here's the goo\n" }
+
+	package Bar;
+	@ISA = qw( Buz );
+	sub google { print "google here\n" }a
+
+	package Baz;
+	sub mumble { print "mumbling\n" }
+
+	package Foo;
+	@ISA = qw( Bar Baz );
+	sub new {
+		my $type = shift;
+		return bless [], $type;
+	}
+	sub grr { print "grumble\n" }
+	sub goo {
+		my $self = shift;
+		$self->SUPER::goo();
+	}
+	sub mumble {
+		my $self = shift;
+		$self->SUPER::mumble();
+	}
+	sub google {
+		my $self = shift;
+		$self->SUPER::google();
+	}
+
+========================
+Inheriting a Constructor
+========================
+
+An inheritable constructor should use the two-argument form of bless, which allows blessing directly into a specified class. Notice in this example that the object will be a BAR not a FOO, even though the constructor is in class FOO.
+
+::
+
+	package FOO;
+	sub new {
+		my $type = shift;
+		my $self = {};
+		return bless $self, $type;
+	}
+	sub baz {
+		print "in FOO::baz()\n";
+	}
+
+	package BAR;
+	@ISA = qw(FOO);
+	sub baz {
+		print "in BAR::baz()\n";
+	}
+
+	package main;
+	$a = BAR->new;
+	$a->baz;
+
+Signals
+-------
+
+The **%SIG** hash contains references (either symbolic or hard) to user-defined signal handlers. When an event transpires, the handler corresponding to that event is called with one argument containing the name of the signal that triggered it.
+
+For example, to unpack an interrupt signal, set up a handler like this:
+
+::
+
+	sub catch_zap {
+	my $signame = shift;
+		$shucks++;
+		die "Somebody sent me a SIG$signame!";
+	}
+	$SIG{INT} = 'catch_zap'; # could fail outside of package main
+	$SIG{INT} = \&catch_zap; # best strategy
+
+
+We try to avoid anything more complicated than that, because on most systems the C library is not re-entrant. Signals are delivered asynchronously, so calling any print functions (or even anything that needs to malloc(3) more memory) could in theory trigger a memory fault and subsequent core dump if you were already in a related C library routine when the signal was delivered.  (Even the die routine is a bit unsafe unless the process is executing within an eval, which suppresses the I/O from die, which keeps it from calling the C library. Probably.)
+
+You may also choose to assign either of the strings 'IGNORE' or 'DEFAULT' as the handler, in which case Perl will try to discard the signal or do the default thing.
+
+
+You can temporarily ignore other signals by using a local signal handler assignment, which goes out of effect once your block is exited. (Remember, though, that local values are inherited by functions called from within that block.)
+
+::
+
+	sub precious {
+		local $SIG{INT} = 'IGNORE';
+		&more_functions;
+	}
+
+
+Anonymous pipes
+---------------
+
+Perl's open function opens a pipe instead of a file when you append or prepend a pipe symbol to the second argument to open. This turns the rest of the argument into a command, which will be interpreted as a process (or set of processes) to pipe a stream of data either into or out of. Here's how to start up a child process that you intend to write to:
+
+::
+
+	open SPOOLER, "| cat -v | lpr -h 2>/dev/null" or die "can't fork: $!";
+	local $SIG{PIPE} = sub { die "spooler pipe broke" };
+	print SPOOLER "stuff\n";
+	close SPOOLER or die "bad spool: $! $?";
+
+And here's how to start up a child process that you intend to read from:
+
+::
+
+	open STATUS, "netstat -an 2>&1 \|" or die "can't fork: $!";
+	while (<STATUS>) {
+		next if /^(tcp|udp)/;
+		print;
+	}
+	close STATUS or die "bad netstat: $! $?"
+
+
+You might have noticed that you can use backticks to accomplish the same effect as opening a pipe for reading:
+
+::
+
+	print grep { !/^(tcp|udp)/ } `netstat -an 2>&1`;
+	die "bad netstat" if $?;
+
+Be careful to check the return values of both open and close. (If you're writing to a pipe, you should also be prepared to handle the PIPE signal, which is sent to you if the process on the other end dies before you're done sending to it.) The reason you need to check both the open and the close has to do with an idiosyncrasy of UNIX in how piped commands are started up. When you do the open, your process forks a child process that is in charge of executing the command you gave it. The fork(2) system call, if successful, returns immediately within the parent process, and the parent script leaves the open function successfully, even though the child process may not have even run yet. By the time the child process actually tries to run the command, it's already a separately scheduled process. So if it fails to execute the command, it has no easy way to communicate the fact back to the open statement, which may have already exited successfully in the parent. The way the disaster is finally communicated back to the parent is the same way that any other disaster in the child process is communicated back: namely, the exit status of the child process is harvested by the parent process when it eventually does a wait(2) system call. But this happens in the close function, not the open function. And that's why you have to check the return value of your close function. Whew.
+
+===================
+Talking to yourself
+===================
+
+To represent this to the open function, you use a pseudo-command consisting of a minus. So the second argument to open looks like either "-|" or "\|-"
+
+The open function returns the child's process ID in the parent process, but 0 in the child process. Another asymmetry is that the filehandle is used only in the parent process. 
+
+This is useful for safely opening a file when running under an assumed UID or GID, for example:
+
+::
+
+	use English;
+
+	my $sleep_count = 0;
+	do {
+		$pid = open(KID_TO_WRITE, "|-");
+		unless (defined $pid) {
+			warn "cannot fork: $!";
+			die "bailing out" if $sleep_count++ > 6;
+			sleep 10;
+		}
+	} until defined $pid;
+
+	if ($pid) { # parent
+		print KID_TO_WRITE @some_data;
+		close(KID_TO_WRITE) or warn "kid exited $?";
+	}
+	else {
+		# child
+		($EUID, $EGID) = ($UID, $GID); # suid progs only
+		open (FILE, "> /safe/file")
+		or die "can't open /safe/file: $!";
+		while (<STDIN>) {
+			print FILE; # child's STDIN is parent's KID
+		}
+		exit; # don't forget this
+	}
+
+===========================
+Bidirectional communication
+===========================
+
+While pipes work reasonably well for unidirectional communication, what about bidirectional communication? The obvious thing you'd like to do doesn't actually work: 
+
+::
+
+	open(PROG_FOR_READING_AND_WRITING, "| some program |") # WRONG!
+
+and if you forget to use the **-w** switch, then you'll miss out entirely on the diagnostic message: Can't do bidirectional pipe at myprog line 3.  The open function won't allow this because it's rather error prone unless you know what you're doing, and can easily result in deadlock, which we'll explain later. But if you really want to do it, you can
+
+
+Other Topics
+------------
+For Other advanced topics like **IPC, C/C++/Other-languages interaction, efficiency, debugging** refer to the book.
 
