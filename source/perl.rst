@@ -1,0 +1,1923 @@
+Perl
+====
+
+.. contents::
+
+.. highlight:: perl
+
+Perl Data Types
+---------------
+
+===========     =========       ==========      =======================================
+Type		Character	Example		Is a name for:
+===========     =========       ==========      =======================================
+Scalar		$		$cents		An individual value (number or string)
+Array		@		@large		A list of values, keyed by number
+Hash		%		%interest	A group of values, keyed by string
+Subroutine	&		&how		A callable chunk of Perl code
+Typeglob	\*		struck		Everything named struck
+===========     =========       ==========      =======================================
+
+File Test Operators
+-------------------
+
+========	===================================================
+Operator	Meaning
+========	===================================================
+-r		File is readable by effective uid/gid.
+-w		File is writable by effective uid/gid.
+-x		File is executable by effective uid/gid.
+-o		File is owned by effective uid.
+-R		File is readable by real uid/gid.
+-W		File is writable by real uid/gid.
+-X		File is executable by real uid/gid.
+-O		File is owned by real uid.
+-e		File exists.
+-z		File has zero size.
+-s		File has non-zero size (returns size).
+-f		File is a plain file.
+-d		File is a directory.
+-l		File is a symbolic link.
+-p		File is a named pipe (FIFO).
+-S		File is a socket.
+-b		File is a block special file.
+-c		File is a character special file.
+-t		Filehandle is opened to a tty.
+-u		File has setuid bit set.
+-g		File has setgid bit set.
+-k		File has sticky bit set.
+-T		File is a text file.
+-B		File is a binary file (opposite of -T).
+-M		Age of file (at startup) in days since modification.
+-A		Age of file (at startup) in days since last access.
+-C		Age of file (at startup) in days since inode change.
+========	===================================================
+
+The -T and -B switches work as follows. The first block or so of the file is examined for odd characters such as strange control codes or characters with the high bit set. If too many odd characters (>30%) are found, it's a -B file, otherwise it's a -T file. 
+
+Also, any file containing null in the first block is considered a binary file. If -T or -B is used on a filehandle, the current input (standard I/O or "stdio") buffer is examined rather than the first block of the file.
+
+True/False
+----------
+
+1. Any string is true except for "" and "0".
+2. Any number is true except for 0.
+3. Any reference is true.
+4. Any undefined value is false.
+
+Actually, the last two rules can be derived from the first two. Any reference (rule 3) points to something with an address, and would evaluate to a number or string containing that address, which is never 0. And any undefined value (rule 4) would always evaluate to 0 or the null string.
+
+======================
+&& || and or operators
+======================
+
+=========	=====	================================
+Example		Name	Result
+=========	=====	================================
+$a && $b	And	$a if $a is false, $b otherwise
+$a || $b	Or	$a if $a is true, $b otherwise
+! $a		Not	True if $a is not true
+$a and $b	And	$a if $a is false, $b otherwise
+$a or $b	Or	$a if $a is true, $b otherwise
+not $a		Not	True if $a is not true
+=========	=====	================================
+
+
+Arrays and Hashes
+-----------------
+
+To assign a list value to an array, you simply group the variables together (with a set of parentheses): Or keyed, or indexed, or subscripted, or looked up. Take your pick.
+
+::
+
+	@home = ("couch", "chair", "table", "stove");
+
+Conversely, if you use @home in a list context, such as on the right side of a list assignment, you get back out the same list you put in. So you could set four scalar variables from the array like this:
+
+::
+
+	($potato, $lift, $tennis, $pipe) = @home;
+
+These are called list assignments. They logically happen in parallel, so you can swap two variables by saying:
+
+::
+
+	($alpha,$omega) = ($omega,$alpha);
+
+Since arrays are ordered, there are various useful operations that you can do on them, such as the stack operations, push and pop. A stack is, after all, just an ordered list, with a beginning and an end.  Especially an end. Perl regards the end of your list as the top of a stack. (Although most Perl programmers think of a list as horizontal, with the top of the stack on the right.)
+
+You can't push or pop a hash though, because it doesn't make sense. A hash has no beginning or end.
+
+Suppose you wanted to translate abbreviated day names to the corresponding full names. You could write the following list assignment.
+
+::
+
+	%longday = ("Sun", "Sunday", "Mon", "Monday", "Tue", "Tuesday",
+			"Wed", "Wednesday", "Thu", "Thursday", "Fri",
+			"Friday", "Sat", "Saturday");
+
+	%longday = (
+		"Sun" => "Sunday",
+		"Mon" => "Monday",
+		"Tue" => "Tuesday",
+		"Wed" => "Wednesday",
+		"Thu" => "Thursday",
+		"Fri" => "Friday",
+		"Sat" => "Saturday",
+	);
+
+Not only can you assign a list to a hash, as we did above, but if you use a hash in list context, it'll convert the hash back to a list of key/value pairs, in a weird order. This is occasionally useful. More often people extract a list of just the keys, using the (aptly named) keys function. The key list is also unordered, but can easily be sorted if desired, using the (aptly named) sort function. 
+
+
+So, for example, if you want to find out the value associated with Wed in the hash above, you would use $longday{"Wed"}. Note again that you are dealing with a scalar value, so you use $, not %.
+
+File handles
+------------
+
+::
+
+	open(SESAME, "filename");                 # read from existing file
+	open(SESAME, "<filename");                # (same thing, explicitly)
+	open(SESAME, ">filename");                # create file and write to it
+	open(SESAME, ">>filename");               # append to existing file
+	open(SESAME, "| output-pipe-command");    # set up an output filter
+	open(SESAME, "input-pipe-command |");     # set up an input filter
+
+
+Once opened, the filehandle SESAME can be used to access the file or pipe until it is explicitly closed (with, you guessed it, close(SESAME)), or the filehandle is attached to another file by a subsequent open on the same filehandle.
+
+Once you've opened a filehandle for input (or if you want to use STDIN), you can read a line using the line reading operator, <>. This is also known as the angle operator, because of its shape. The angle operator encloses the filehandle (<SESAME>) you want to read lines from.[20]
+
+::
+
+	$number = <STDIN>; # input the number
+	print STDOUT "The number is $number\n"; 
+
+If you try the above example, you may notice that you get an extra blank line. This happens because the read does not automatically remove the newline from your input line (your input would be, for example, "9\n"). For those times when you do want to remove the newline, Perl provides the chop and chomp functions. chop will indiscriminately remove (and return) the last character passed to it, while chomp will only remove the end of record marker (generally, "\n"), and return the number of characters so removed. You'll often see this idiom for inputting a single line:
+
+::
+
+	chop($number = <STDIN>); # input number and remove newline 
+	
+which means the same thing as
+
+::
+
+	$number = <STDIN>; # input number
+	chop($number);
+
+
+Operators
+---------
+
+=================
+Binding Operators
+=================
+
+Binary **=~** binds a scalar expression to a pattern match, substitution, or translation. These operations search or modify the string $_ by default.
+
+The return value indicates the success of the operation.
+
+Binary **!~** is just like **=~** except the return value is negated in the logical sense. 
+
+The following expressions are functionally equivalent:
+
+::
+
+	$string !~ /pattern/
+	not $string =~ /pattern/
+
+The most spectacular kind of true value is a list value: in a list context, pattern matches can return substrings matched by the parentheses in the pattern. But again, according to the rules of list assignment, the list assignment itself will return true if anything matched and was assigned, and false otherwise. So you sometimes see things like:
+
+::
+
+	if ( ($k,$v) = $string =~ m/(\w+)=(\w*)/ ) {
+		print "KEY $k VALUE $v\n";
+	}
+
+====================
+Relational Operators
+====================
+
+=======		======	=========================
+Numeric		String	Meaning
+=======		======	=========================
+>		gt	Greater than
+>=		ge	Greater than or equal to
+<		lt	Less than
+<=		le	Less than or equal to
+=======		======	=========================
+
+
+==================
+Equality Operators
+==================
+
+The equality operators are much like the relational operators.
+
+=======		======	===============================
+Numeric		String	Meaning
+=======		======	===============================
+==		eq	Equal to
+!=		ne	Not equal to
+<=>		cmp	Comparison, with signed result
+=======		======	===============================
+
+The equal and not-equal operators return 1 for true, and "" for false (just as the relational operators do).
+
+The <=> and cmp operators return -1 if the left operand is less than the right operand, 0 if they are equal, and +1 if the left operand is greater than the right. 
+
+==============
+Range Operator
+==============
+
+The **..** range operator is really two different operators depending on the context. In a list context, it returns a list of values counting (by ones) from the left value to the right value. This is useful for writing for (1..10) loops and for doing slice operations on arrays.
+
+Be aware that under the current implementation, a temporary array is created, so you'll burn a lot of memory if you write something like this:
+
+::
+
+	for (1 .. 1_000_000) {
+		# code
+	}
+
+====================
+Conditional Operator
+====================
+
+Trinary **?:** is the conditional operator, just as in C. It works as:
+
+::
+
+	TEST_EXPR ? IF_TRUE_EXPR : IF_FALSE_EXPR
+
+	$a = $ok ? $b : $c; # get a scalar
+	@a = $ok ? @b : @c; # get an array
+	$a = $ok ? @b : @c; # get a count of elements in one of the arrays
+
+========================
+String Multiply/Addition
+========================
+
+There's also a "multiply" operation for strings, also called the repeat operator. Again, it's a separate operator (x) to keep it distinct from numeric multiplication:
+
+::
+
+	$a = 123;
+	$b = 3;
+	print $a * $b;	# prints 369
+	print $a x $b;	# prints 123123123
+
+There is also an "addition" operator for strings that does concatenation. Unlike some languages that confuse this with numeric addition, Perl defines a separate operator (.) for string concatenation:
+
+::
+
+	$a = 123;
+	$b = 456;
+	print $a + $b;	# prints 579
+	print $a . $b;	# prints 123456
+
+
+	$line .= "\n";	# Append newline to $line.
+	$fill x= 80;	# Make string $fill into 80 repeats of itself.
+	$val ||= "2";	# Set $val to 2 if it isn't already set.
+
+for/foreach
+-----------
+
+A for loop is similar to C
+
+::
+
+	for ($i = 0; $i < 10; $i++) {
+		...
+	}
+
+A foreach loop
+
+::
+
+	foreach $user (@users) {
+		if (-f "$home{$user}/.nexrc") {
+			print "$user is cool... they use a perl-aware vi!\n";
+		}
+	}
+
+In a foreach statement, the expression in parentheses is evaluated to produce a list. Then each element of the list is aliased to the loop variable in turn, and the block of code is executed once for each element. Note that the loop variable becomes a reference to the element itself, rather than a copy of the element. Hence, modifying the loop variable will modify the original array.
+
+A frequently seen idiom is a loop to iterate over the sorted keys of a hash:
+
+::
+
+	foreach $key (sort keys %hash) {
+		if ($line =~ /http:/) {
+			print $line;
+		}
+	}
+
+Here, the =~ (pattern binding operator) is telling Perl to look for a match of the regular expression http: in the variable $line. If it finds the expression, the operator returns a true value and the block (a print command) is executed. By the way, if you don't use the =~ binding operator, then Perl will search a default variable instead of $line. This default space is really just a special variable that goes by the odd name of $_. In fact, many of the operators in Perl default to using the $_ variable, so an expert Perl programmer might write the above as:
+
+::
+
+	while (<FILE>) {
+		print if /http:/;
+	}
+
+Special Variables
+-----------------
+
+::
+
+	$digit
+	$&	$MATCH
+	$`	$PREMATCH
+	$'	$POSTMATCH
+	$+	$LAST_PAREN_MATCH
+	$*	$MULTILINE_MATCHING
+	$_	$ARG
+	$.	$INPUT_LINE_NUMBER		$NR
+	$/	$INPUT_RECORD_SEPARATOR		$RS
+	$,	$OUTPUT_FIELD_SEPARATOR		$OFS
+	$\	$OUTPUT_RECORD_SEPARATOR	$ORS
+	$"	$LIST_SEPARATOR
+	$?	$CHILD_ERROR
+	$!	$OS_ERROR			$ERRNO
+	$@	$EVAL_ERROR
+	$$	$PROCESS_ID			$PID
+	$<	$REAL_USER_ID			$UID
+	$>	$EFFECTIVE_USER_ID		$EUID
+	$(	$REAL_GROUP_ID			$GID
+	$)	$EFFECTIVE_GROUP_ID		$EGID
+	$0	$PROGRAM_NAME
+
+=====================
+Global Special Arrays
+=====================
+
+::
+
+	@ARGV
+	@INC The array containing the list of places to look for Perl scripts to be evaluated by the do EXPR, require, or use constructs. 
+	%INC The hash containing entries for the filename of each file that has been included via do or require.
+	%ENV The hash containing your current environment. 
+	%SIG The hash used to set signal handlers for various signals. Example:
+		sub handler {
+			# 1st argument is signal name
+			local($sig) = @_;
+			print "Caught a SIG$sig--shutting down\n";
+			close(LOG);
+			exit(0);
+		}
+
+Some Useful Functions
+---------------------
+
+=========
+?PATTERN?
+=========
+
+::
+	
+	?PATTERN?
+
+This is just like the /PATTERN/ search, except that it matches only once between calls to reset, so it finds only the first occurrence of something rather than all occurrences.
+
+
+=====
+bless
+=====
+
+::
+	
+	bless REF, CLASSNAME
+	bless REF
+
+This function looks up the item pointed to by reference REF and tells the item that it is now an object in the CLASSNAME package - or the current package if no CLASSNAME is specified, which is often the case. It returns the reference for convenience, since a bless is often the last thing in a constructor function. (Always use the two-argument version if the constructor doing the blessing might be inherited by a derived class. In such cases, the class you want to bless your object into will normally be found as the first argument to the constructor in question.) 
+
+
+======
+caller
+======
+
+::
+
+	caller EXPR
+	caller
+
+This function returns information about the stack of current subroutine calls. Without an argument it returns the package name, filename, and line number that the currently executing subroutine was called from: ($package, $filename, $line) = caller; With an argument it evaluates EXPR as the number of stack frames to go back before the current one. It also reports some additional information.
+
+::
+
+	$i = 0;
+	while (($pack, $file, $line, $subname, $hasargs, $wantarray) = caller($i++)) {
+		...
+	}
+
+Furthermore, when called from within the DB package, caller returns more detailed information: it sets the list variable @DB::args to be the arguments passed in the given stack frame.
+
+
+=======
+defined
+=======
+
+::
+
+	defined EXPR
+
+This function returns a Boolean value saying whether EXPR has a real value or not. A scalar that contains no valid string, numeric, or reference value is known as the undefined value, or undef for short. Many operations return the undefined value under exceptional conditions, such as end of file, uninitialized variable, system error, and such. This function allows you to distinguish between an undefined null string and a defined null string when you're using operators that might return a real null string.
+
+In the next example we use the fact that some operations return the undefined value when you run out of data:
+
+::
+
+	print "$val\n" while defined($val = pop(@ary));
+
+Since symbol tables for packages are stored as hashes (associative arrays), it's possible to check for the existence of a package like this:
+
+::
+
+	die "No XYZ package defined" unless defined %XYZ::;
+
+Finally, it's possible to avoid blowing up on nonexistent subroutines:
+
+::
+
+	sub saymaybe {
+		if (defined &say) {
+			say(@_);
+		}
+		else {
+			warn "Can't say";
+		}
+	}
+
+======
+delete
+======
+
+::
+
+	delete EXPR
+
+This function deletes the specified key and associated value from the specified hash.  Deleting from $ENV{} modifies the environment. 
+
+The following naïve example inefficiently deletes all the values of a hash:
+
+::
+
+	foreach $key (keys %HASH) {
+		delete $HASH{$key};
+	}
+
+(It would be faster to use the undef command on the whole hash.) 
+
+For normal hashes, the delete function happens to return the value (not the key) that was deleted, but this behavior is not guaranteed for tied hashes, such as those bound to DBM files.
+
+==
+do
+==
+
+::
+
+	do BLOCK
+	do SUBROUTINE(LIST)
+	do EXPR
+
+The do BLOCK form executes the sequence of commands in the BLOCK, and returns the value of the last expression evaluated in the block. When modified by a loop modifier, Perl executes the BLOCK once before testing the loop condition. (
+
+====
+each
+====
+
+::
+
+	each HASH
+
+This function returns a two-element list consisting of the key and value for the next value of a hash. With successive calls to each you can iterate over the entire hash. Entries are returned in an apparently random order. 
+
+::
+
+	while (($key,$value) = each %ENV) {
+		print "$key=$value\n";
+	}
+
+====
+eval
+====
+
+::
+
+	eval EXPR
+	eval BLOCK
+
+The value expressed by EXPR is parsed and executed as though it were a little Perl program. It is executed in the context of the current Perl program, so that any variable settings remain afterward, as do any subroutine or format definitions. The code of the eval is treated as a block, so any locally scoped variables declared within the eval last only until the eval is done. (See local and my.) As with any code in a block, a final semicolon is not required. If EXPR is omitted, the operator evaluates $_.
+
+Since eval traps otherwise-fatal errors, it is useful for determining whether a particular feature (such as socket or symlink) is implemented. In fact, eval is the way to do all exception handling in Perl. If the code to be executed doesn't vary, you should use the eval BLOCK form to trap run-time errors; 
+
+======
+exists
+======
+
+::
+
+	exists EXPR
+
+This function returns true if the specified hash key exists in its hash, even if the corresponding value is undefined.
+
+::
+
+	print "Exists\n" if exists $hash{$key};
+	print "Defined\n" if defined $hash{$key};
+	print "True\n" if $hash{$key};
+
+A hash element can only be true if it's defined, and can only be defined if it exists, but the reverse doesn't necessarily hold true in either case.
+
+====
+grep
+====
+
+::
+
+	grep EXPR, LIST
+	grep BLOCK LIST
+
+This function evaluates EXPR or BLOCK in a Boolean context for each element of LIST, temporarily setting $_ to each element in turn. In list context, it returns a list of those elements for which the expression is true. (The operator is named after a beloved UNIX program that extracts lines out of a file that match a particular pattern. In Perl the expression is often a pattern, but doesn't have to be.) In scalar context, grep returns the number of times the expression was true.  
+
+Presuming @all_lines contains lines of code, this example weeds out comment lines:
+
+::
+
+	@code_lines = grep !/^#/, @all_lines;
+
+See also map. The following two statements are functionally equivalent:
+
+::
+
+	@out = grep { EXPR } @in;
+	@out = map { EXPR ? $_ : () } @in
+
+===
+hex
+===
+
+::
+
+	hex EXPR
+
+This function interprets EXPR as a hexadecimal string and returns the equivalent decimal value. (To interpret strings that might start with 0 or 0x see oct.) If EXPR is omitted, it interprets $_. The following code sets $number to 4,294,906,560:
+
+::
+
+	$number = hex("ffff12c0");
+
+=====
+index
+=====
+
+::
+
+	index STR, SUBSTR, POSITION
+	index STR, SUBSTR
+
+This function returns the position of the first occurrence of SUBSTR in STR. The POSITION, if specified, says where to start looking. Positions are based at 0 (or whatever you've set the $[ variable to - but don't do that). If the substring is not found, the function returns one less than the base, ordinarily -1.  
+
+To work your way through a string, you might say:
+
+::
+
+	$pos = -1;
+	while (($pos = index($string, $lookfor, $pos)) > -1) {
+		print "Found at $pos\n";
+		$pos++;
+	}
+
+====
+join
+====
+
+::
+
+	join EXPR, LIST
+
+This function joins the separate strings of LIST into a single string with fields separated by the value of EXPR, and returns the string. For example:
+
+::
+
+	$_ = join ':', $login,$passwd,$uid,$gid,$gcos,$home,$shell;
+
+====
+keys
+====
+
+::
+
+	keys HASH
+
+This function returns a list consisting of all the keys of the named hash. The keys are returned in an apparently random order, but it is the same order as either the values or each function produces
+
+::
+
+	@keys = keys %ENV;
+	@values = values %ENV;
+	while (@keys) {
+		print pop(@keys), '=', pop(@values), "\n";
+	}
+
+To sort a hash by value, you'll need to provide a comparison function. Here's a descending numeric sort of a hash by its values:
+
+::
+
+	foreach $key (sort { $hash{$b} <=> $hash{$a} } keys %hash) {
+		printf "%4d %s\n", $hash{$key}, $key;
+	}
+
+====
+kill
+====
+
+::
+
+	kill LIST
+
+This function sends a signal to a list of processes. The first element of the list must be the signal to send.
+
+::
+
+	$cnt = kill 1, $child1, $child2;
+	kill 9, @goners;
+
+==
+lc
+==
+
+::
+
+	lc EXPR
+
+This function returns a lowercased version of EXPR (or $_ if omitted). 
+
+======
+length
+======
+
+::
+
+	length EXPR
+
+This function returns the length in bytes of the scalar value EXPR. If EXPR is omitted, the function returns the length of $_, but be careful that the next thing doesn't look like the start of an EXPR, or the tokener will get confused. When in doubt, always put in parentheses.  Do not try to use length to find the size of an array or hash. Use scalar @array for the size of an array, and scalar keys %hash for the size of a hash. (The scalar is typically dropped when redundant, which is typical.)
+
+===
+map
+===
+
+::
+
+	map BLOCK LIST
+	map EXPR, LIST
+
+This function evaluates the BLOCK or EXPR for each element of LIST (locally setting $_ to each element) and returns the list value composed of the results of each such evaluation. It evaluates BLOCK or EXPR in a list context, so each element of LIST may produce zero, one, or more elements in the returned value. These are all flattened into one list. For instance:
+
+::
+
+	@words = map { split ' ' } @lines;
+
+splits a list of lines into a list of words. Often, though, there is a one-to-one mapping between input values and output values:
+
+::
+
+	@chars = map chr, @nums;
+
+===
+new
+===
+
+::
+
+	new CLASSNAME LIST
+	new CLASSNAME
+
+There is no built-in new function. It is merely an ordinary constructor method (subroutine) defined (or inherited) by the CLASSNAME module to let you construct objects of type CLASSNAME. Most constructors are named "new", but only by convention, just to delude C++ programmers into thinking they know what's going on.
+
+==
+no
+==
+
+::
+
+	no Module LIST
+
+See the use operator, which no is the opposite of, kind of.
+
+===
+pop
+===
+
+::
+
+	pop ARRAY
+	pop
+
+This function treats an array like a stack - it pops and returns the last value of the array, shortening the array by 1. If ARRAY is omitted, the function pops @ARGV (in the main program), or @_ (in subroutines). It has the same effect as:
+
+::
+
+	$tmp = $ARRAY[$#ARRAY--];
+
+======
+printf
+======
+
+::
+
+	printf FILEHANDLE FORMAT LIST
+	printf FORMAT LIST
+
+This function prints a formatted string to FILEHANDLE or, if omitted, the currently selected output filehandle, initially STDOUT. The first item in the LIST must be a string that says how to format the rest of the items. This is similar to the C library's printf(3) and fprintf(3) function, except that the * field width specifier is not supported. The function is equivalent to: 
+
+::
+
+	print FILEHANDLE sprintf LIST
+
+====
+push
+====
+
+::
+
+	push ARRAY, LIST
+
+This function treats ARRAY as a stack, and pushes the values of LIST onto the end of ARRAY. The length of ARRAY increases by the length of LIST. The function returns this new length. The push function has the same effect as:
+
+::
+
+	foreach $value (LIST) {
+		$ARRAY[++$#ARRAY] = $value;
+	}
+
+===
+ref
+===
+
+::
+
+	ref EXPR
+
+The ref operator returns a true value if EXPR is a reference, the null string otherwise. The value returned depends on the type of thing the reference is a reference to. Built-in types include:
+
+::
+
+	REF
+	SCALAR
+	ARRAY
+	HASH
+	CODE
+	GLOB
+
+If the referenced object has been blessed into a package, then that package name is returned instead. You can think of ref as a "typeof" operator.
+
+::
+
+	if (ref($r) eq "HASH") {
+		print "r is a reference to a hash.\n";
+	}
+	elsif (ref($r) eq "Hump") {
+		print "r is a reference to a Hump object.\n";
+	}
+	elsif (not ref $r) {
+		print "r is not a reference at all.\n";
+	}
+
+=======
+reverse
+=======
+
+::
+
+	reverse LIST
+
+In list context, this function returns a list value consisting of the elements of LIST in the opposite order.
+
+This is fairly efficient because it just swaps the pointers around. The function can be used to create descending sequences:
+
+::
+
+	for (reverse 1 .. 10) { ... }
+
+=====
+shift
+=====
+
+::
+
+	shift ARRAY
+	shift
+
+This function shifts the first value of the array off and returns it, shortening the array by 1 and moving everything down. (Or up, or left, depending on how you visualize the array list.) If there are no elements in the array, the function returns the undefined value. If ARRAY is omitted, the function shifts @ARGV (in the main program), or @_ (in subroutines). 
+
+====
+sort
+====
+
+::
+
+	sort SUBNAME LIST
+	sort BLOCK LIST
+	sort LIST
+
+This function sorts the LIST and returns the sorted list value. By default, it sorts in standard string comparison order (undefined values sorting before defined null strings, which sort before everything else). SUBNAME, if given, is the name of a subroutine that returns an integer less than, equal to, or greater than 0, depending on how the elements of the list are to be ordered. (The handy <=> and cmp operators can be used to perform three-way numeric and string comparisons.) In the interests of efficiency, the normal calling code for subroutines is bypassed, with the following effects: the subroutine may not be a recursive subroutine, and the two elements to be compared are passed into the subroutine not via @_ but as $a and $b (see the examples below). The variables $a and $b are passed by reference, so don't modify them in the subroutine. SUBNAME may be a scalar variable name (unsubscripted), in which case the value provides the name of (or a reference to) the actual subroutine to use. In place of a SUBNAME, you can provide a BLOCK as an anonymous, in-line sort subroutine.
+
+To do an ordinary numeric sort, say this:
+
+::
+
+	sub numerically { $a <=> $b; }
+	@sortedbynumber = sort numerically 53,29,11,32,7;
+
+::
+
+	sub prospects {
+		$money{$b} <=> $money{$a}
+			or
+		$height{$b} <=> $height{$a}
+			or
+		$age{$a} <=> $age{$b}
+			or
+		$lastname{$a} cmp $lastname{$b}
+			or
+		$a cmp $b;
+	}
+	@sortedclass = sort prospects @class;
+
+To sort fields without regard to case, say:
+
+::
+
+	@sorted = sort { lc($a) cmp lc($b) } @unsorted;
+
+======
+splice
+======
+
+::
+
+	splice ARRAY, OFFSET, LENGTH, LIST
+	splice ARRAY, OFFSET, LENGTH
+	splice ARRAY, OFFSET
+
+This function removes the elements designated by OFFSET and LENGTH from an array, and replaces them with the elements of LIST, if any.
+
+
+Direct Method Splice Equivalent
+
+::
+
+	push(@a, $x, $y) splice(@a, $#a+1, 0, $x, $y)
+	pop(@a) splice(@a, -1)
+	shift(@a) splice(@a, 0, 1)
+	unshift(@a, $x, $y) splice(@a, 0, 0, $x, $y)
+	$a[$x] = $y
+	splice(@a, $x, 1, $y);
+
+=====
+split
+=====
+
+::
+
+	split /PATTERN/, EXPR, LIMIT
+	split /PATTERN/, EXPR
+	split /PATTERN/
+	split
+
+This function scans a string given by EXPR for delimiters, and splits the string into a list of substrings, returning the resulting list value in list context, or the count of substrings in scalar context.
+
+Strings of any length can be split:
+
+::
+
+	@chars = split //, $word;
+	@fields = split /:/, $line;
+	@words = split ' ', $paragraph;
+	@lines = split /^/m, $buffer;
+
+The LIMIT parameter is used to split only part of a string:a
+
+::
+
+	($login, $passwd, $remainder) = split /:/, $_, 3;
+
+We said earlier that the delimiters are not returned, but if the PATTERN contains parentheses, then the substring matched by each pair of parentheses is included in the resulting list, interspersed with the fields that are ordinarily returned. Here's a simple case:
+
+::
+
+	split /([-,])/, "1-10,20";
+
+produces the list value:
+
+::
+
+	(1, '-', 10, ',', 20)
+
+=======
+sprintf
+=======
+
+::
+
+	sprintf FORMAT, LIST
+
+This function returns a string formatted by the usual printf conventions. 
+
+======
+substr
+======
+
+::
+
+	substr EXPR, OFFSET, LENGTH
+	substr EXPR, OFFSET
+
+This function extracts a substring out of the string given by EXPR and returns it. The substring is extracted starting at OFFSET characters from the front of the string.
+
+To prepend the string "Larry" to the current value of $_, use:
+
+::
+
+	substr($_, 0, 0) = "Larry";
+
+To instead replace the first character of $_ with "Moe", use:
+
+::
+
+	substr($_, 0, 1) = "Moe";
+
+and finally, to replace the last character of $_ with "Curly", use:
+
+::
+
+	substr($_, -1, 1) = "Curly";
+
+=======
+syscall
+=======
+
+::
+
+	syscall LIST
+
+This function calls the system call specified as the first element of the list, passing the remaining elements as arguments to the system call. (Many of these are now more readily available through the POSIX module, and others.) The function produces a fatal error if syscall(2) is unimplemented. The arguments are interpreted as follows: if a given argument is numeric, the argument is passed as a C integer. If not, a pointer to the string value is passed. You are responsible for making sure the string is long enough to receive any result that might be written into it. Otherwise you're looking at a coredump. If your integer arguments are not literals and have never been interpreted in a numeric context, you may need to add 0 to them to force them to look like numbers. (See the following example.)
+
+This example calls the setgroups(2) system call to add to the group list of the current process. (It will only work on machines that support multiple group membership.)
+
+::
+
+	require 'syscall.ph';
+	syscall &SYS_setgroups, @groups+0, pack("i*", @groups);
+
+======
+system
+======
+
+::
+
+	system LIST
+
+This function executes any program on the system for you. It does exactly the same thing as exec LIST except that it does a fork first, and then, after the exec, it waits for the exec'd program to complete. That is (in non-UNIX terms), it runs the program for you, and returns when it's done, unlike exec, which never returns (if it succeeds). 
+
+Because system and backticks block SIGINT and SIGQUIT, killing the program they're running withone of those signals doesn't actually interrupt your program.
+
+::
+
+	@args = ("command", "arg1", "arg2");
+	system(@args) == 0
+	or die "system @args failed: $?"
+
+Here's a more elaborate example of analyzing the return value from system on a UNIX system to check for all possibilities, including for signals and coredumps.
+
+::
+
+	$rc = 0xffff & system @args;
+	printf "system(%s) returned %#04x: ", "@args", $rc;
+	if ($rc == 0) {
+		print "ran with normal exit\n";
+	}
+	elsif ($rc == 0xff00) {
+		print "command failed: $!\n";
+	}
+	elsif (($rc & 0xff) == 0) {
+		$rc >>= 8;
+		print "ran with non-zero exit status $rc\n";
+	}
+	else {
+		print "ran with ";
+		if ($rc & 0x80) {
+			$rc &= ~0x80;
+			print "coredump from ";
+		}
+		print "signal $rc\n"
+	}
+	$ok = ($rc == 0);
+
+-----------
+system vs `
+-----------
+
+::
+
+	$cwd = `pwd`;			# string output from a command
+	$exit = system("vi $x");	# numeric status of a command
+
+====
+time
+====
+
+This function returns the number of non-leap seconds since January 1, 1970, UTC.[10] 
+
+==
+uc
+==
+
+::
+
+	uc EXPR
+
+This function returns an uppercased version of EXPR
+
+=====
+undef
+=====
+
+::
+
+	undef EXPR
+	undef
+
+This function undefines the value of EXPR, which must be an lvalue. Use only on a scalar value, an entire array or hash, or a subroutine name (using the & prefix).
+
+
+::
+
+	undef $foo;
+	undef $bar{'blurfl'};
+	undef @ary;
+	undef %assoc;
+	undef &mysub;
+
+=======
+unshift
+=======
+
+::
+	
+	unshift ARRAY, LIST
+
+This function does the opposite of a shift. (Or the opposite of a push, depending on how you look at it.)
+
+It prepends LIST to the front of the array, and returns the new number of elements in the array:
+
+::
+
+	unshift @ARGV, '-e', $cmd unless $ARGV[0] =~ /^-/;
+
+======
+values
+======
+
+::
+
+	values HASH
+
+This function returns a list consisting of all the values of the named hash. The values are returned in an apparently random order, but it is the same order as either the keys or each function would produce on the same hash.
+
+====
+wait
+====
+
+::
+
+	wait
+
+This function waits for a child process to terminate and returns the pid of the deceased process, or -1 if there are no child processes. The status is returned in $?. If you get zombie child processes, you should be calling this function, or waitpid. A common strategy to avoid such zombies is:
+
+::
+
+	$SIG{CHLD} = sub { wait };
+
+If you expected a child and didn't find it, you probably had a call to system, a close on a pipe, or backticks between the fork and the wait. These constructs also do a wait(2) and may have harvested your child process. Use waitpid to avoid this problem.
+
+=======
+waitpid
+=======
+
+::
+
+	waitpid PID, FLAGS
+
+This function waits for a particular child process to terminate and returns the pid when the process is dead, or -1 if there are no child processes, or 0 if the FLAGS specify non-blocking and the process isn't dead yet. The status of the dead process is returned in $?. To get valid flag values say this:
+
+::
+
+	use POSIX "sys_wait_h";
+
+=========
+wantarray
+=========
+
+::
+
+	wantarray
+
+This function returns true if the context of the currently executing subroutine is looking for a list value.
+
+The function returns false if the context is looking for a scalar. Here's a typical usage, demonstrating an "unsuccessful" return:
+
+::
+
+	return wantarray ? () : undef;
+
+====
+warn
+====
+
+::
+
+	warn LIST
+
+This function produces a message on STDERR just like die, but doesn't try to exit or throw an exception.
+
+For example:
+
+::
+
+	warn "Debug enabled" if $debug;
+
+If the message supplied is null, the message "Something's wrong" is used. As with die, a message not ending with a newline will have file and line number information automatically appended.
+
+
+Regular Expression
+------------------
+
+=================
+Character Classes
+=================
+
+==============	===============	====
+Name		Definition	Code
+==============	===============	====
+Whitespace	[ \\t\\n\\r\\f]	\\s
+Word character	[a-zA-Z_0-9]	\\w
+Digit		[0-9]		\\d
+==============	===============	====
+
+Perl also provides the negation of these classes by using the uppercased character, such as **\\D** for a non-digit character.
+
+We should note that \\w is not always equivalent to [a-zA-Z_0-9]. Some locales define additional alphabetic characters outside the ASCII sequence, and \w respects them.
+
+===========
+Quantifiers
+===========
+
+You put the two numbers in braces, separated by a comma. For example, if you were trying to match North American phone numbers, **/\d{7,11}/** would match at least seven digits, but no more than eleven digits.
+
+Certain combinations of minimum and maximum occur frequently, so Perl defines special quantifiers for them. We've already seen 
+
+::
+
+	+, which is the same as {1,}, or "at least one of the preceding item"
+	*, which is the same as {0,}, or "zero or more of the preceding item"
+	?, which is the same as {0,1}, or "zero or one of the preceding item" (that is, the preceding item is optional).
+
+Often, someone will have a string like:
+
+::
+
+	spp:Fe+H20=FeO2;H:2112:100:Stephen P Potter:/home/spp:/bin/tcsh
+
+and try to match "spp:" with **/.+:/**. However, since the **+** quantifier is greedy, this pattern will match everything up to and including "/home/spp:". Sometimes you can avoid this by using a negated character class, that is, by saying **/[^:]+:/**, which says to match one or more non-colon characters (as many as possible), up to the first colon
+
+
+The other point to be careful about is that regular expressions will try to match as early as possible. This even takes precedence over being greedy. Since scanning happens left-to-right, this means that the pattern will match as far left as possible, even if there is some other place where it could match longer. (Regular expressions are greedy, but they aren't into delayed gratification.) For example, suppose you're using the substitution command (s///) on the default variable space (variable $_, that is), and you want to remove a string of x's from the middle of the string. If you say: Sorry, we didn't pick that notation, so don't blame us. That's just how regular expressions are customarily written in UNIX culture.
+
+::
+
+	$_ = "fred xxxxxxx barney";
+	s/x*//;
+
+it will have absolutely no effect. This is because the x* (meaning zero or more "x" characters) will be able to match the "nothing" at the beginning of the string, since the null string happens to be zero characters wide and there's a null string just sitting there plain as day before the "f" of "fred". Even the authors get caught by this from time to time.
+
+There's one other thing you need to know. By default quantifiers apply to a single preceding character, so /bam{2}/ will match "bamm" but not "bambam". To apply a quantifier to more than one character, use parentheses. So to match **"bambam"**, use the pattern **/(bam){2}/**.
+
+================
+Minimal Matching
+================
+
+In modern versions of Perl, you can force nongreedy, minimal matching by use of a question mark after any quantifier. Our same username match would now be **/.*?:/**. That **.*?** will now try to match as few characters as possible, rather than as many as possible, so it stops at the first colon rather than the last.
+
+=======
+Anchors
+=======
+
+The special character string \b matches at a word boundary, which is defined as the "nothing" between a word character (\w) and a non-word character (\W), in either order. (The characters that don't exist off the beginning and end of your string are considered to be non-word characters.) For example,
+
+::
+
+	/\bFred\b/
+
+would match both "The Great Fred" and "Fred the Great", but would not match "Frederick the Great" because the "de" in "Frederick" does not contain a word boundary.
+
+==============
+Backreferences
+==============
+
+A pair of parentheses around a part of a regular expression causes whatever was matched by that part to be remembered for later use. It doesn't change what the part matches, so **/\d+/** and **/(\d+)/** will still match as many digits as possible, but in the latter case they will be remembered in a special variable to be backreferenced later.
+
+How you refer back to the remembered part of the string depends on where you want to do it from.  Within the same regular expression, you use a backslash followed by an integer. The integer corresponding to a given pair of parentheses is determined by counting left parentheses from the beginning of the pattern, starting with one. So for example, to match something similar to an HTML tag (like **"<B>Bold</B>"**, you might use **/<(.*?)>.*?<\/\1>/**. This forces the two parts of the pattern to match the exact same string, such as the "B" above.
+
+Outside the regular expression itself, such as in the replacement part of a substitution, the special variable is used as if it were a normal scalar variable named by the integer. So, if you wanted to swap the first two words of a string, for example, you could use:
+
+::
+
+	s/(\S+)\s+(\S+)/$2 $1/
+
+The right side of the substitution is really just a funny kind of double-quoted string, which is why you can interpolate variables there, including backreference variables. This is a powerful concept: **interpolation** (under controlled circumstances) is one of the reasons Perl is a good text-processing language. The other reason is the pattern matching, of course. Regular expressions are good for picking things apart, and interpolation is good for putting things back together again. Perhaps there's hope for Humpty Dumpty after all.
+
+===============
+List Processing
+===============
+
+First, list context has to be provided by something in the "surroundings". In the example above, the list assignment provides it. If you look at the various syntax summaries scattered throughout Chapter 2 and Chapter 3, you'll see various operators that are defined to take a LIST as an argument. Those are the operators that provide a list context. Throughout this book, LIST is used as a specific technical term to mean "a syntactic construct that provides a list context". For example, if you look up sort, you'll find the syntax summary:
+
+::
+
+	sort LIST
+
+That means that sort provides a list context to its arguments.  
+
+Second, at compile time, any operator that takes a LIST provides a list context to each syntactic element of that LIST. So every top-level operator or entity in the LIST knows that it's supposed to produce the best list it knows how to produce. This means that if you say:
+
+::
+
+	sort @guys, @gals, other();	
+
+then each of @guys, @gals, and other() knows that it's supposed to produce a list value.
+
+Finally, at run-time, each of those LIST elements produces its list in turn, and then (this is important) all the separate lists are joined together, end to end, into a single list. And that squashed-flat, one-dimensional list is what is finally handed off to the function that wanted a LIST in the first place. So if **@guys** contains **(Fred,Barney)**, **@gals** contains **(Wilma,Betty)**, and the **other()** function returns the single-element list (Dino), then the LIST that sort sees is
+
+::
+
+	(Fred,Barney,Wilma,Betty,Dino)
+
+and the LIST that sort returns is
+
+::
+
+	(Barney,Betty,Dino,Fred,Wilma)
+
+Some operators produce lists (like keys), some consume them (like print), and some transform lists into other lists (like sort). Operators in the last category can be considered filters; only, unlike in the shell, the flow of data is from right to left, since list operators operate on their arguments passed in from the right.
+
+You can stack up several list operators in a row:
+
+::
+
+	print reverse sort map {lc} keys %hash;
+
+That takes the keys of %hash and returns them to the map function, which lowercases all the keys by applying the lc operator to each of them, and passes them to the sort function, which sorts them, and passes them to the reverse function, which reverses the order of the list elements, and passes them to the print function, which prints them.  As you can see, that's much easier to describe in Perl than in English.
+
+=cut
+----
+
+One other lexical oddity is that if a line begins with = in a place where a statement would be legal, Perl ignores everything from that line down to the next line that says **=cut**. The ignored text is assumed to be POD, or plain old documentation. (The Perl distribution has programs that will turn POD commentary into manpages, LaTeX, or HTML documents.)
+
+Variables
+---------
+
+There are variable types corresponding to each of the three data types we mentioned. Each of these is introduced (grammatically speaking) by what we call a "funny character". Scalar variables are always named with an initial $, even when referring to a scalar that is part of an array or hash. It works a bit like the English word "the". Thus, we have:
+
+============	===================================================
+Construct	Meaning
+============	===================================================
+$days		Simple scalar value $days
+$days[28]	29th element of array @days
+$days{'Feb'}	"Feb" value from hash %days
+$#days		Last index of array @days
+$days->[28]	29th element of array pointed to by reference $days
+============	===================================================
+
+Entire arrays or array slices (and also slices of hashes) are named with @, which works much like the words "these" or "those":
+
+==================	=========================================
+Construct		Meaning
+==================	=========================================
+@days			Same as ($days[0], $days[1],... $days[n])
+@days[3, 4, 5]		Same as ($days[3], $days[4], $days[5])
+@days[3..5]		Same as ($days[3], $days[4], $days[5])
+@days{'Jan','Feb'}	Same as ($days{'Jan'},$days{'Feb'})
+==================	=========================================
+
+Every variable type has its own namespace. You can, without fear of conflict, use the same name for a scalar variable, an array, or a hash (or, for that matter, a filehandle, a subroutine name, a label, or your pet llama). This means that **$foo and @foo are two different variables**. It also means that **$foo[1] is an element of @foo**, not a part of $foo. This may seem a bit weird, but that's okay, because it is weird.
+
+Since variable names always start with **$, @, or %**, the reserved words can't conflict with variable names.  But they can conflict with nonvariable identifiers, such as labels and filehandles, which don't have an initial funny character. Since reserved words are always entirely lowercase, we recommend that you pick label and filehandle names that do not appear all in lowercase. For example, you could say open(LOG,'logfile') rather than the regrettable open(log,'logfile').[3] Using **uppercase filehandles** also improves readability and protects you from conflict with future reserved words.
+
+Apart from the subscripts of interpolated array and hash variables, there are no multiple levels of interpolation. In particular, contrary to the expectations of shell programmers, backquotes do not interpolate within double quotes, nor do single quotes impede evaluation of variables when used within double quotes.
+
+=========	=======		=============	===============
+Customary	Generic		Meaning		Interpolates
+=========	=======		=============	===============
+''		q//		Literal		No
+""		qq//		Literal		Yes
+``		qx//		Command		Yes
+()		qw//		Word list	No
+//		m//		Pattern match	Yes
+s///		s///		Substitution	Yes
+y///		tr///		Translation	No
+=========	=======		=============	===============
+
+Or leave the quotes out entirely
+
+=========
+Barewords
+=========
+A word that has no other interpretation in the grammar will be treated as if it were a quoted string. These are known as **barewords**.
+
+As with filehandles and labels, a bareword that consists entirely of lowercase letters risks conflict with future reserved words. If you use the -w switch, Perl will warn you about barewords.
+
+::
+
+	@days = (Mon,Tue,Wed,Thu,Fri);
+	print STDOUT hello, ' ', world, "\n";
+
+sets the array @days to the short form of the weekdays and prints hello world followed by a newline on STDOUT. If you leave the filehandle out, Perl tries to interpret hello as a filehandle, resulting in a syntax error. Because this is so error-prone, some people may wish to outlaw barewords entirely. If you say:
+
+::
+
+	use strict 'subs';
+
+then any bareword that would not be interpreted as a subroutine call produces a compile-time error instead.
+
+The restriction lasts to the end of the enclosing block. An inner block may countermand this by saying:
+
+::
+
+	no strict 'subs';
+
+Note that the bare identifiers in constructs like:
+
+::
+
+	"${verb}able"
+	$days{Feb}
+
+are not considered barewords, since they're allowed by explicit rule rather than by having "no other interpretation in the grammar".
+
+==========================
+Interpolating array values
+==========================
+
+Array variables are interpolated into double-quoted strings by joining all the elements of the array with the delimiter specified in the $" variable[13] (which is a space by default). The following are equivalent:
+
+::
+
+	$temp = join($",@ARGV);
+	print $temp;
+	print "@ARGV";
+
+====================
+Other literal tokens
+====================
+
+Two special literals are **__LINE__** and **__FILE__**, which represent the current line number and filename at that point in your program.
+
+
+List Values and Arrays and context
+----------------------------------
+
+Now that we've talked about context, we can talk about list values, and how they behave in context. List values are denoted by separating individual values by commas (and enclosing the list in parentheses where precedence requires it):
+
+::
+
+	(LIST)
+
+In a list context, the value of the list literal is all the values of the list in order. In a scalar context, the value of a list literal is the value of the final element, as with the C comma operator, which always throws away the value on the left and returns the value on the right. (In terms of what we discussed earlier, the left side of the comma operator provides a void context.) For example:
+
+::
+
+	@stuff = ("one", "two", "three");
+
+assigns the entire list value to array @stuff, but:
+
+::
+
+	$stuff = ("one", "two", "three");
+
+assigns only the value three to variable $stuff. The comma operator knows whether it is in a scalar or a list context. An actual array variable also knows its context. In a list context, it would return its entire contents, but in a scalar context it returns only the length of the array (which works out nicely if you mention the array in a conditional). The following assigns to $stuff the value 3:
+
+::
+
+	@stuff = ("one", "two", "three");
+	$stuff = @stuff;	# $stuff gets 3, not "three"
+
+Until now we've pretended that LISTs are just lists of literals. But in fact, any expressions that return values may be used within lists. The values so used may either be scalar values or list values. LISTs do automatic interpolation of sublists. That is, when a LIST is evaluated, each element of the list is evaluated in a list context, and the resulting list value is interpolated into LIST just as if each individual element were a member of LIST. Thus arrays lose their identity in a LIST. The list:
+
+::
+
+	(@foo,@bar,&SomeSub)
+
+contains all the elements of @foo, followed by all the elements of @bar, followed by all the elements returned by the subroutine named SomeSub when it's called in a list context. You can use a reference to an array if you do not want it to interpolate.
+
+=========================
+Typeglobs and Filehandles
+=========================
+
+Perl uses an internal type called a typeglob to hold an entire symbol table entry. The type prefix of a typeglob is a * , because it represents all types. This used to be the preferred way to pass arrays and hashes by reference into a function, but now that we have real references, this mechanism is seldom needed.
+
+Typeglobs (or references thereto) are still used for passing or storing filehandles. If you want to save away a filehandle, do it this way:
+
+::
+
+	$fh = *STDOUT;
+
+or perhaps as a real reference, like this:
+
+::
+
+	$fh = \*STDOUT;
+
+This is also the way to create a local filehandle. For example:
+
+::
+
+	sub newopen {
+		my $path = shift;
+		local *FH;		# not my!
+		open (FH, $path) || return undef;
+		return *FH;
+	}
+	$fh = newopen('/etc/passwd');
+
+But the main use of typeglobs nowadays is to alias one symbol table entry to another symbol table entry. If you say:
+
+::
+
+	*foo = *bar;
+
+it makes everything named "foo" a synonym for every corresponding thing named "bar". You can alias just one of the variables in a typeglob by assigning a reference instead:
+
+::
+
+	*foo = \$bar;
+
+makes $foo an alias for $bar, but doesn't make @foo an alias for @bar, or %foo an alias for %bar.
+
+Aliasing variables like this may seem like a silly thing to want to do, but it turns out that the entire module export/import mechanism is built around this feature, since there's nothing that says the symbol you're aliasing has to be in your namespace.
+
+Command input (backtick) operator
+---------------------------------
+First of all, we have the command input operator, also known as the backticks operator, because it looks like this:
+
+::
+
+	$info = `finger $user`;
+
+A string enclosed by backticks (grave accents) first undergoes variable interpolation just like a double-quoted string. The result of that is then interpreted as a command by the shell, and the output of that command becomes the value of the pseudo-literal. (This is modeled after a similar operator in some of the UNIX shells.) In scalar context, a single string consisting of all the output is returned. In list context, a list of values is returned, one for each line of output. (You can set $/ to use a different line terminator.) The command is executed each time the pseudo-literal is evaluated. The numeric status value of the command is saved in $? (see the section "Special Variables" later in this chapter for the interpretation of $?). Unlike the csh version of this command, no translation is done on the return data - newlines remain newlines. Unlike any of the shells, single quotes do not hide variable names in the command from interpretation. To pass a $ through to the shell you need to hide it with a backslash. The $user in our example above is interpolated by Perl, not by the shell. (Because the command undergoes shell processing, see Chapter 6, Social Engineering, for security concerns.) The generalized form of backticks is qx// (for "quoted execution"), but the operator works exactly the same way as ordinary backticks. You just get to pick your quote characters.
+
+
+Pattern Matching
+----------------
+
+The two main pattern matching operators are m//, the match operator, and s///, the substitution operator.  There is also a split operator, which takes an ordinary match operator as its first argument but otherwise behaves like a function, and is therefore documented in Chapter 3.  Although we write m// and s/// here, you'll recall that you can pick your own quote characters. On the other hand, for the m// operator only, the m may be omitted if the delimiters you pick are in fact slashes.  (You'll often see patterns written this way, for historical reasons.)
+
+The matching operations can have various modifiers, some of which affect the interpretation of the regular expression inside:
+
+========	====================================================================
+Modifier	Meaning
+========	====================================================================
+i		Do case-insensitive pattern matching.
+m		Treat string as multiple lines (^ and $ match internal \n).
+s		Treat string as single line (^ and $ ignore \n, but . matches \n).
+x		Extend your pattern's legibility with whitespace and comments.
+o		Only compile pattern once.
+g		Match globally, that is, find all occurrences.
+========	====================================================================
+
+These are usually written as "the /x modifier", even though the delimiter in question might not actually be a slash. In fact, any of these modifiers may also be embedded within the regular expression itself using the (?...) construct. 
+
+
+Unary \\  creates a reference to whatever follows it (see Chapter 4). Do not confuse this behavior with the behavior of backslash within a string, although both forms do convey the notion of protecting the next thing from interpretation. This resemblance is not entirely accidental.  The \\ operator may also be used on a parenthesized list value in a list context, in which case it returns references to each element of the list.
+
+
+Bare Blocks and Case Structures
+-------------------------------
+
+A BLOCK by itself (labeled or not) is semantically equivalent to a loop that executes once. Thus you can use last to leave the block or redo to restart the block.[41] Note that this is not true of the blocks in eval {}, sub {}, or do {} commands, which are not loop blocks and cannot be labeled. They can't be labeled because they're just terms in an expression. Loop control commands may only be used on true loops, just as the return command may only be used within a subroutine or eval. But you can always introduce an extra set of braces to give yourself a bare block, which counts as a loop.
+
+For reasons that may (or may not) become clear upon reflection, a next also exits the once-through block. There is a slight difference, however, in that a next will execute a continue block, while a last won't.  The bare block is particularly nice for doing case structures (multiway switches).
+
+::
+
+	SWITCH: {
+		if (/^abc/) { $abc = 1; last SWITCH; }
+		if (/^def/) { $def = 1; last SWITCH; }
+		if (/^xyz/) { $xyz = 1; last SWITCH; }
+		$nothing = 1;
+	}
+
+There is no official switch statement in Perl, because there are already several ways to write the equivalent. In addition to the above, you could write: 
+
+::
+
+	SWITCH: {
+	$abc = 1, last SWITCH if /^abc/;
+	$def = 1, last SWITCH if /^def/;
+	$xyz = 1, last SWITCH if /^xyz/;
+	$nothing = 1;
+	}
+
+or:
+
+::
+
+	SWITCH: {
+		/^abc/ && do { $abc = 1; last SWITCH; };
+		/^def/ && do { $def = 1; last SWITCH; };
+		/^xyz/ && do { $xyz = 1; last SWITCH; };
+		$nothing = 1;
+	}
+
+Goto
+----
+Although not for the faint of heart (or the pure of heart, for that matter), Perl does support a goto command. There are three forms: goto LABEL, goto EXPR, and goto &NAME.  The goto LABEL form finds the statement labeled with LABEL and resumes execution there. It may not be used to go inside any construct that requires initialization, such as a subroutine or a foreach loop. It also can't be used to go into a construct that is optimized away. It can be used to go almost anywhere else within the current block or one you were called from, including out of subroutines, but it's usually better to use some other construct. 
+
+
+Scoped Declarations
+-------------------
+A package declaration, oddly enough, is lexically scoped, despite the fact that a package is a global entity. But a package declaration merely declares the identity of the default package for the rest of the enclosing block. Undeclared, unqualified variable names will be looked up in that package. In a sense, a package isn't declared at all, but springs into existence when you refer to a variable that belongs in the package. It's all very Perlish.
+
+
+The most frequently seen form of lexically scoped declaration is the declaration of my variables. A related form of scoping known as dynamic scoping applies to local variables, which are really global variables in disguise. If you refer to a variable that has not been declared, its visibility is global by default, and its lifetime is forever. A variable used at one point in your program is accessible from anywhere else in the program.[45] If this were all there were to the matter, Perl programs would quickly become unwieldy as they grew in size. Fortunately, you can easily create private variables using my, and semi-private values of global variables using local. A my or a local declares the listed variables (in the case of my), or the values of the listed global variables (in the case of local), to be confined to the enclosing block, subroutine, eval, or file.
+
+
+A local variable is dynamically scoped, whereas a my variable is lexically scoped. The difference is that any dynamic variables are also visible to functions called from within the block in which those variables are declared. Lexical variables are not.  They are totally hidden from the outside world, including any called subroutines (even if it's the same subroutine called from itself or elsewhere - every instance of the subroutine gets its own copy of the variables).
+
+By and large, you should prefer to use my over local because it's faster and safer. But you have to use local if you want to temporarily change the value of an existing global variable, such as any of the special variables listed at the end of this chapter. Only alphanumeric identifiers may be lexically scoped
+
+
+Subroutines
+-----------
+
+To declare a subroutine, use one of these forms:
+
+::
+
+	sub NAME;		# A "forward" declaration.
+	sub NAME (PROTO);	# Ditto, but with prototype.
+
+To declare and define a subroutine, use one of these forms:a
+
+::
+
+	sub NAME BLOCK		# A declaration and a definition.
+	sub NAME (PROTO) BLOCK	# Ditto, but with prototype.
+
+To define an anonymous subroutine or closure at run-time, use a statement like:
+
+::
+
+	$subref = sub BLOCK;
+
+To import subroutines defined in another package, say:
+
+::
+
+	use PACKAGE qw(NAME1 NAME2 NAME3...);
+
+To call subroutines directly:
+
+::
+
+	NAME(LIST); # & is optional with parentheses.
+	NAME LIST;  # Parens optional if predeclared/imported.
+	&NAME;      # Passes current @_ to subroutine.
+
+
+To call subroutines indirectly (by name or by reference):
+
+::
+
+	&$subref(LIST);		# & is not optional on indirect call.
+	&$subref;		# Passes current @_ to subroutine.
+
+The Perl model for passing data into and out of a subroutine is simple: all function parameters are passed as one single, flat list of scalars, and multiple return values are likewise returned to the caller as one single, flat list of scalars.
+
+As with any LIST, any arrays or hashes passed in these lists will interpolate their values into the flattened list, losing their identities - but there are several ways to get around this, and the automatic list interpolation is frequently quite useful.
+
+If you call a function with two arguments, those would be stored in $_[0] and $_[1]. Since @_ is an array, you can use any array operations you like on the parameter list. (This is an area where Perl is more orthogonal than the typical computer language.) The array @_ is a local array, but its values are implicit references to the actual scalar parameters. Thus you can modify the actual parameters if you modify the corresponding element of @_.
+
+The return value of the subroutine (or of any other block, for that matter) is the value of the last expression evaluated. Or you may use an explicit return statement to specify the return value and exit the subroutine from any point in the subroutine. Either way, as the subroutine is called in a scalar or list context, so also is the final expression of the routine evaluated in the same scalar or list context.
+
+Do not, however, be tempted to do this:
+
+::
+
+	(@a, @b) = upcase(@list1, @list2);	# WRONG
+
+Why not? Because, like the flat incoming parameter list, the return list is also flat. So all you have managed to do here is store everything in @a and make @b an empty list.
+
+
+The official name of a subroutine includes the & prefix. A subroutine may be called using the prefix, but the & is usually optional, and so are the parentheses if the subroutine has been predeclared. (Note, however, that the & is not optional when you're just naming the subroutine, such as when it's used as an argument to defined or undef, or when you want to generate a reference to a named subroutine by saying $subref = \&name. Nor is the & optional when you want to do an indirect subroutine call with a subroutine name or reference using the &$subref() or &{$subref}()
+
+==================
+Passing References
+==================
+
+If you can arrange for the function to receive references as its parameters and return them as its return results, it's cleaner code, although not so nice to look at. Here's a function that takes two array references as arguments, returning the two array references ordered according to how many elements they have in them:
+
+::
+
+	($aref, $bref) = func(\@c, \@d);
+	print "@$aref has more than @$bref\n";
+	sub func {
+		my ($cref, $dref) = @_;
+		if (@$cref > @$dref) {
+			return ($cref, $dref);
+		} else {
+			return ($dref, $cref);
+		}
+	}
+
+==========
+Prototypes
+==========
+
+Declared as Called as
+
+::
+
+	sub mylink ($$) mylink $old, $new
+	sub myvec ($$$) myvec $var, $offset, 1
+	sub myindex ($$;$) myindex &getstring, "substr"
+	sub mysyswrite ($$$;$) mysyswrite $buf, 0, length($buf) - $off, $off
+	sub myreverse (@) myreverse $a,$b,$c
+	sub myjoin ($@) myjoin ":",$a,$b,$c
+	sub mypop (\@) mypop @array
+	sub mysplice (\@$$@) mysplice @array,@array,0,@pushme
+	sub mykeys (\%) mykeys %{$hashref}
+	sub myopen (*;$) myopen HANDLE, $name
+	sub mypipe (**) mypipe READHANDLE, WRITEHANDLE
+	sub mygrep (&@) mygrep { /foo/ } $a,$b,$c
+	sub myrand ($) myrand 42
+	sub mytime () mytime
+
+
+References and Nested Data Structures
+-------------------------------------
+
+Suppose you wanted to build a simple table (two-dimensional array) showing vital statistics - say, age, eye color, and weight - for a group of people. You could do this by first creating an array for each individual:
+
+::
+
+	@john = (47, "brown", 186);
+	@mary = (23, "hazel", 128);
+	@bill = (35, "blue", 157);
+
+and then constructing a single, additional array consisting of the names of the other arrays:
+
+::
+
+	@vitals = ('john', 'mary', 'bill');
+
+Unfortunately, actually using this table as a two-dimensional data structure is cumbersome. To change John's eyes to "red" after a night on the town, you'd have to say something like:
+
+::
+
+	$vitals = $vitals[0];
+	eval "\$${vitals}[1] = 'red'";
+
+========================
+Creating Hard References
+========================
+
+**The Backslash Operator**
+
+You can create a reference to any named variable or subroutine by using the unary backslash operator.  (You may also use it on an anonymous scalar value.) This works much like the & (address-of) operator in C.
+
+Here are some examples:
+
+::
+
+	$scalarref = \$foo;
+	$constref = \186_282.42;
+	$arrayref = \@ARGV;
+	$hashref = \%ENV;
+	$code_ref = \&handler;
+	$globref = \*STDOUT;
+
+============================
+The Anonymous Array Composer
+============================
+
+You can create a reference to an anonymous array by using brackets:
+
+::
+
+	$arrayref = [1, 2, ['a', 'b', 'c']];
+
+Note that taking a reference to an enumerated list is not the same as using brackets - instead it's treated as a shorthand for creating a list of references:
+
+::
+
+	@list = (\$a, \$b, \$c);
+	@list = \($a, $b, $c);		# same thing!
+
+===========================
+The Anonymous Hash Composer
+===========================
+
+You can create a reference to an anonymous hash by using braces:
+
+::
+
+	$hashref = {
+		'Adam' => 'Eve',
+		'Clyde' => 'Bonnie',
+	};
+
+=================================
+The Anonymous Subroutine Composer
+=================================
+
+You can create a reference to an anonymous subroutine by using sub without a subroutine name:
+
+::
+
+	$coderef = sub { print "Boink!\n" };
+
+Note the presence of the semicolon, which is required here to terminate the expression. (It wouldn't be required after the declaration of a named subroutine.) A nameless sub {} is not so much a declaration as it is an operator - like do {} or eval {} - except that the code inside isn't executed immediately.  Instead, it just generates a reference to the code and returns that.
+
+======================
+Filehandle Referencers
+======================
+
+References to filehandles can be created by taking a reference to a typeglob. This is currently the best way to pass named filehandles into or out of subroutines, or to store them in larger data structures
+
+::
+
+	splutter(\*STDOUT);
+	sub splutter {
+		my $fh = shift;
+		print $fh "her um well a hmmm\n";
+	}
+	$rec = get_rec(\*STDIN);
+	sub get_rec {
+		my $fh = shift;
+		return scalar <$fh>;
+	}
+
+===================================
+Using a Variable as a Variable Name
+===================================
+
+Anywhere you might ordinarily put an alphanumeric identifier as part of a variable or subroutine name, you can just replace the identifier with a simple scalar variable containing a reference of the correct type.
+
+For example:
+
+::
+
+	$foo = "two humps";
+	$scalarref = \$foo;
+	$camel_model = $$scalarref; # $camel_model is now "two humps"
+
+Here are various dereferences:
+
+::
+
+	$bar = $$scalarref;
+	push(@$arrayref, $filename);
+	$$arrayref[0] = "January";
+	$$hashref{"KEY"} = "VALUE";
+	&$coderef(1,2,3);
+	$bar = ${$scalarref};
+	push(@{$arrayref}, $filename);
+	${$arrayref}[0] = "January";
+	${$hashref}{"KEY"} = "VALUE";
+	&{$coderef}(1,2,3);
+
+It's important to understand that we are specifically not dereferencing $arrayref[0] or $hashref{"KEY"} there. The dereferencing of the scalar variable happens before any array or hash lookups.
+
+Therefore, the following prints "howdy":
+
+::
+
+	$refrefref = \\\"howdy";
+	print $$$$refrefref;
+
+You can think of the dollar signs as executing right to left.
+
+Admittedly, it's silly to use the braces in these simple cases, but the BLOCK can contain any arbitrary expression. In particular, it can contain subscripted expressions. In the following example, $dispatch{$index} is assumed to contain a reference to a subroutine. The example invokes the subroutine with three arguments.
+
+::
+
+	&{ $dispatch{$index} }(1, 2, 3);
+
+::
+
+	$ $arrayref [0] = "January";
+	${ $arrayref }[0] = "January";
+	$arrayref->[0] = "January";
+	$ $hashref {KEY} = "F#major";
+	${ $hashref }{KEY} = "F#major";
+	$hashref->{KEY} = "F#major";
+
+	print $array[3]->{"English"}->[0];
+
+One more shortcut here. The arrow is optional between brace- or bracket-enclosed subscripts, so you can shrink the above code down to:
+
+::
+
+	$array[3]{"English"}[0] = "January";
+
+Which, in the case of ordinary arrays, gives you multi-dimensional arrays just like C's arrays:
+
+::
+
+	$answer[$x][$y][$z] += 42;
+
+===================
+Symbolic References
+===================
+
+What happens if you try to dereference a value that is not a hard reference? The value is then treated as a symbolic reference. That is, the reference (which still has a scalar value) is interpreted as a string. That string is taken to be the name of a variable, rather than a direct link to a (possibly anonymous) thingy.  Here is how it works:
+
+::
+
+	$name = "bam";            # Sets $bam
+	$$name = 1;               # Sets $bam
+	${$name} = 2;             # Sets $bambam
+	${$name x 2} = 3;         # Sets $bam[0]
+	$name->[0] = 4;           # Clears @bam
+	@$name = ();              # Calls &bam() (as in prior versions of Perl)
+	&$name();                 # (Don't use "package" or "pack"!)
+	$pkg = "THAT";            # Sets $THAT::bam without eval
+	${"${$pkg}::$name"} = 5;
+
+
+This is very powerful, and slightly dangerous, in that it's possible to intend (with the utmost sincerity) to use a hard reference, and accidentally use a symbolic reference instead. To protect against that, you can say:
+
+::
+
+	use strict 'refs';
+
+and then only hard references will be allowed for the rest of the enclosing block. An inner block may countermand that decree with:
+
+::
+
+	no strict 'refs';
+
+
+::
+
+	${identifier}; # same as $identifier
+	${"identifier"}; # also $identifier, but treated as symbolic reference
+
+=======================================
+Hard References Don't Work as Hash Keys
+=======================================
+
+Consistent with the foregoing, hash keys are stored internally as strings.[7] If you try to store a hard reference as a key in a hash, the key value will be converted into a string:
+
+::
+
+	$x{ \$a } = $a;
+	($key, $value) = each %x;
+	print $$key; # WRONG
+
+======================
+Composition and Access
+======================
+
+Here's how to put together a two-dimensional array value:
+
+::
+
+	# assign to an array a list of list references
+	@LoL = (
+		[ "fred", "barney" ],
+		[ "george", "jane", "elroy" ],
+		[ "homer", "marge", "bart" ],
+	);
+	print $LoL[2][2];	# prints "bart"
+
+The overall list is enclosed by parentheses, not brackets. That's because you're assigning a list to an array.  If you didn't want the result to be a list, but rather a reference to an array, then you would use brackets on the outside:
+
+::
+
+	# assign to a scalar variable a reference to a list of list references
+	$ref_to_LoL = [
+		[ "fred", "barney", "pebbles", "bambam", "dino", ],
+		[ "homer", "bart", "marge", "maggie", ],
+		[ "george", "jane", "elroy", "judy", ],
+	];
+	print $ref_to_LoL->[2][2];	# prints "elroy"
+
+**$ref_to_LoL is a reference to an array, whereas @LoL is an array proper**.
+
+
