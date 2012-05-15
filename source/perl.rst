@@ -9,6 +9,7 @@ References
 ----------
 
 - **Programming Perl** by **Larry Wall** second edition
+- **Learning Perl the Hard Way** by **Allen B. Downey**
 
 Perl Data Types
 ---------------
@@ -103,11 +104,30 @@ Conversely, if you use @home in a list context, such as on the right side of a l
 
 	($potato, $lift, $tennis, $pipe) = @home;
 
+
+In an assignment statement, the left side determines the context. If the left side is a scalar, the right side is evaluated in **scalar context**. If the left side is an array, the right side is evaluated in **list context**.
+
+If an array is evaluated in scalar context, it yields the number of elements in the array. 
+
+::
+
+	my $word = @params;
+	print "$word\n";
+
 These are called list assignments. They logically happen in parallel, so you can swap two variables by saying:
 
 ::
 
 	($alpha,$omega) = ($omega,$alpha);
+
+The following subroutine assigns the first parameter to p1, the second to p2, and a list of the remaining parameters to @params.
+
+::
+
+	sub echo {
+		my ($p1, $p2, @params) = @_;
+		print "$p1 $p2 @params\n";
+	}
 
 Since arrays are ordered, there are various useful operations that you can do on them, such as the stack operations, push and pop. A stack is, after all, just an ordered list, with a beginning and an end.  Especially an end. Perl regards the end of your list as the top of a stack. (Although most Perl programmers think of a list as horizontal, with the top of the stack on the right.)
 
@@ -135,6 +155,13 @@ Not only can you assign a list to a hash, as we did above, but if you use a hash
 
 
 So, for example, if you want to find out the value associated with Wed in the hash above, you would use $longday{"Wed"}. Note again that you are dealing with a scalar value, so you use $, not %.
+
+You can get more than one element at a time from an array by putting a list of indices in brackets.
+
+::
+
+	my @words = @params[0, 2];
+
 
 File handles
 ------------
@@ -170,6 +197,32 @@ which means the same thing as
 
 	$number = <STDIN>; # input number
 	chop($number);
+
+Interpolation
+-------------
+
+**Variable interpolation** : When the name of a variable appears in double quotesi (or in other scenarios), it is replaced by the value of the variable.
+**Backslash interpolation** : When a sequence beginning with a backslash () appears in double quotes, it is replaced with the character specified by the sequence.
+
+::
+
+	print "@ARGV\n";
+	
+In this case, the variable appears in double quotes, so it is evaluated in **interpolative context**. It is an array variable, and in interpolative context, the elements of the array are joined using the separator specified by the built-in variable **$"**. The default value is a space.
+
+use strict/warnings
+-------------------
+
+::
+
+	use strict;
+	user warnings;
+
+Now if you misspell the name of a variable, you get something like this:
+
+::
+
+	Global symbol "@ARG" requires explicit package name.
 
 
 Operators
@@ -1254,9 +1307,36 @@ Outside the regular expression itself, such as in the replacement part of a subs
 
 The right side of the substitution is really just a funny kind of double-quoted string, which is why you can interpolate variables there, including backreference variables. This is a powerful concept: **interpolation** (under controlled circumstances) is one of the reasons Perl is a good text-processing language. The other reason is the pattern matching, of course. Regular expressions are good for picking things apart, and interpolation is good for putting things back together again. Perhaps there's hope for Humpty Dumpty after all.
 
-===============
+Backreferences can be nested. For example, the regular expression **((ftp|http):(.*))** creates three variables: **$1** corresponds the outermost cap-
+ture sequence, which yields the entire matching string; $2 and $3 correspond to the two nested sequences.
+
+=================
+Extended patterns
+=================
+
+As regular expressions get longer, they get harder to read and debug. In the previous examples, I have tried to help by assigning the pattern to a variable and then using the variable inside the match operator m//. But that only gets you so far.
+
+An alternative is to use the extended pattern format, which looks like this:
+
+::
+
+	if ($line =~ m{
+			(ftp|http)		# protocol
+			://
+			(.*?)			# machine name (minimal)
+			/
+			(.*)			# file name
+		      }x
+	)
+	{ print "$1, $2, $3\n" }
+
+The pattern begins with **m{ and ends with }x**. The x indicates extended format; it is one of several modifiers that can appear at the end of a regular expression.
+
+The rest of the statement is standard, except that the arrangement of the statements and punctuation is unusual.  The most important features of the extended format are the use of whitespace and comments, both of which make the expression easier to read and debug.
+
+
 List Processing
-===============
+---------------
 
 First, list context has to be provided by something in the "surroundings". In the example above, the list assignment provides it. If you look at the various syntax summaries scattered throughout Chapter 2 and Chapter 3, you'll see various operators that are defined to take a LIST as an argument. Those are the operators that provide a list context. Throughout this book, LIST is used as a specific technical term to mean "a syntactic construct that provides a list context". For example, if you look up sort, you'll find the syntax summary:
 
@@ -1624,6 +1704,19 @@ The Perl model for passing data into and out of a subroutine is simple: all func
 As with any LIST, any arrays or hashes passed in these lists will interpolate their values into the flattened list, losing their identities - but there are several ways to get around this, and the automatic list interpolation is frequently quite useful.
 
 If you call a function with two arguments, those would be stored in $_[0] and $_[1]. Since @_ is an array, you can use any array operations you like on the parameter list. (This is an area where Perl is more orthogonal than the typical computer language.) The array @_ is a local array, but its values are implicit references to the actual scalar parameters. Thus you can modify the actual parameters if you modify the corresponding element of @_.
+
+The elements of the parameter list are aliases for the scalars provided as arguments. An alias is an alternative way to refer to a variable. In other words, @_ can be used to access and modify variables that are used as arguments.
+
+For example, swap takes two parameters and swaps their values:
+
+::
+
+	sub swap {
+		($_[0], $_[1]) = ($_[1], $_[0]);
+	}
+
+When a list appears as an argument, it is “flattened”; that is; the elements of the list are added to the parameter list. So the following code does not swap two lists:
+
 
 The return value of the subroutine (or of any other block, for that matter) is the value of the last expression evaluated. Or you may use an explicit return statement to specify the return value and exit the subroutine from any point in the subroutine. Either way, as the subroutine is called in a scalar or list context, so also is the final expression of the routine evaluated in the same scalar or list context.
 
@@ -2114,6 +2207,22 @@ A constructor is merely a subroutine that returns a reference to a thingy that i
 
 If you want your constructor method to be (usefully) inheritable, then you must use the two-argument form of bless.
 
+The keys of the hash are the **instance variables** of the object. So, the simplest way to create an object is to create a reference to a hash.
+
+::
+
+	my $nobody = { };
+	my $person = { 
+			name => "Allen B. Downey",
+			webpage => "allendowney.com" 
+		};
+	bless $person, "Person";
+
+	sub name {
+		my $self = shift;
+		return $self->{name};
+	}
+	
 In Perl, methods execute in the context of the original base class rather than in the context of the derived class. For example, suppose you have a Polygon class that had a new() method as a constructor. This would work fine when called as Polygon->new(). But then you decide to also have a Square class, which inherits methods from the Polygon class. The only way for that constructor to build an object of the proper class when it is called as Square->new() is by using the two-argument form of bless, as in the following example:
 
 ::
@@ -2548,4 +2657,7 @@ and if you forget to use the **-w** switch, then you'll miss out entirely on the
 Other Topics
 ------------
 For Other advanced topics like **IPC, C/C++/Other-languages interaction, efficiency, debugging** refer to the book.
+
+
+
 
