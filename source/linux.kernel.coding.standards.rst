@@ -1,5 +1,5 @@
-Linux Kernel Coding Standards
-=============================
+Linux : Kernel Coding Standards
+===============================
 
 .. contents::
 
