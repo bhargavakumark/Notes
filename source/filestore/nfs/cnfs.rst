@@ -134,4 +134,4 @@ Known Issues/Limitations/hacks
 ------------------------------
 Even with new FRL based locking we still rely on TCPConnTrack for tracking locking connections and statd has some bugs while converting IPs to names. If a IP cannot be resolved to a name then statd incorrectly uses the local node name as the client name and starts tracking that client. So TCPConnTrack will be used to monitor all clients connecting to NLM.
 
-
+Stale symlinks (/var/lib/nfs/sm will be a symlink to /shared/nlm/<nodename>/sm, if /shared is not mounted then it would be a stale symlink) cause locking requests to fail but lockd/statd will start. statd needs /var/lib/nfs to exist, when creating files it needs /var/lib/nfs/sm. If /var/lib/nfs/sm is state, the statd daemon will start, but when it tries to create a file in /var/lib/nfs/sm it fails and client gets an error
