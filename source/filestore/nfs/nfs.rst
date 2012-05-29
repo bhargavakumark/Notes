@@ -1165,6 +1165,7 @@ NFS handles have 32-bit inode number, where as filesystems would have 64-bit ino
 
 NFS Performance Tuning
 ----------------------
+
 =============================================
 Tuning the number of nfsd daemons on a server
 =============================================
@@ -1226,6 +1227,29 @@ Managing NFS and NIS, 2nd Edition.  By Hal Stern, Mike Eisler and Ricardo Labiag
 When a client mounts a NFS share, a sunrpc xprt socket is established. Both the client and server initialise their sunrpc xprt socket, with **tcp_slot_table_entries**. Once a xprt socket is established, changing the proc variables does not affect any already mounted shares. Once the value of **tcp_slot_table_entries** has been changed, the nfs share should be unmounted/mounted again.
 
 Similar behaviour is expected for **udp_slot_table_entries**
+
+==================================
+NFS Tuning for 10G ethernet (10Ge)
+==================================
+
+::
+
+        sunrpc.tcp_slot_table_entries = 128
+        net.core.rmem_default = 4194304
+        net.core.wmem_default = 4194304
+        net.core.rmem_max = 4194304
+        net.core.wmem_max = 4194304
+        net.ipv4.tcp_rmem = 4096 1048576 4194304
+        net.ipv4.tcp_wmem = 4096 1048576 4194304
+        net.ipv4.tcp_timestamps = 0
+        net.ipv4.tcp_syncookies = 1
+        net.core.netdev_max_backlog = 300000
+
+**cpuspeed** and **irqbalance** disabled
+
+**Jumbo frames**
+
+**Client Options** as **rsize=1048576,wsize=1048576**
 
 NFS IPv6 Support
 ----------------
