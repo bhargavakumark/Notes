@@ -47,6 +47,34 @@ NAND flash devices have large (at least 128KB) block sizes,
 and blocks must be erased as a unit before fresh data can
 be written
 
+While the write operation is performed by the unit of a
+page, the flash memory is erased by the unit of a block that
+is a bundle of several sequential pages.
+
+The typical access latencies for read, write, and
+erase operations are 25 microseconds, 200 microseconds, and
+1500 microseconds, respectively [4]. In addition, before an
+erase operation is being done on a block, the live (i.e., not over-
+written) sectors from that block need to be moved to pre-erased
+blocks. Thus, an erase operation incurs lot of sectors read
+and write operations, which makes it a performance critical
+operation.
+
+However, not all
+flash-based storage devices use FTL [5], [15]. For these
+devices, flash driver can provide the internal flash information.
+In some cases, operating system provides FTL functionality.
+For example, Windows Mobile emulates FTL in software
+
+applications
+are designed (or modified) based on generic FTL behavior.
+Although this is adequate for the applications designed for
+the general computing environment, but for the environments
+(i.e., high end servers or supercomputers) running a fixed
+set of applications (i.e., database management systems), huge
+performance gain could be obtained by using customized
+flash-based storages designed with application specific FTL
+
 
 Write Amplicfication
 --------------------
@@ -287,6 +315,28 @@ load to an already busy CPU might seem counter-intuitive to
 a systems software designer, but in this case doing so improves
 I/O performance.
 
+=================
+Multiple Channels
+=================
+
+To enhance I/O bandwidth, current flash memory SSDs
+access multiple flash chips with multi-channel and multi-
+way architecture [2], [6], where the multiple channels can
+be operated simultaneously and each channel can access
+multiple flash chips at interleaved manner. Two flash chips
+using different channels can be operated independently
+and therefore the page transfer times (from the NAND
+controller to the flash chip) and page program times for
+different chips can overlap. For two flash chips sharing
+a same channel, the data transfer times cannot overlap
+but the page program times can overlap. To utilize such
+parallel architectures, sequential data are distributed across
+multiple flash chips. Therefore, the parallel architecture can
+provide a high bandwidth for sequential requests. However,
+random I/O performances are poor compared to sequential
+I/O performances.
+
+
 Benchamarking Tools
 -------------------
 
@@ -298,5 +348,14 @@ Fio [16] supports both raw and filesystem I/O using block-
 ing reads, Posix AIO, or Linux Native AIO (libaio), using one
 or more processes. It reports similar statistics to VDBench.
 
+ECC (Error Correcting Codes)
+----------------------------
 
+Current NAND flash products ensure reliability by em-
+ploying error-correcting codes (ECC). Traditionally, SLC
+flash memory uses single-bit ECC, such as Hamming codes.
+However, MLC flash memory shows a much higher bit-
+error rate (BER) than single-bit error-correcting codes can
+cover. As a result, codes with strong error-correction capa-
+bilities, like BCH or Reed-Solomon (RS) codes, are used.
 
