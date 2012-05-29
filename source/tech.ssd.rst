@@ -75,6 +75,12 @@ set of applications (i.e., database management systems), huge
 performance gain could be obtained by using customized
 flash-based storages designed with application specific FTL
 
+Garbage collection performance is largely determined by the 
+erasure time. NOR erases very slowly and thus an effective 
+NOR garbage collection strategy is relatively complex and 
+limits the design options. In comparison NAND erases very 
+quickly; thus these limitations don't apply.
+
 
 Write Amplicfication
 --------------------
@@ -358,4 +364,13 @@ However, MLC flash memory shows a much higher bit-
 error rate (BER) than single-bit error-correcting codes can
 cover. As a result, codes with strong error-correction capa-
 bilities, like BCH or Reed-Solomon (RS) codes, are used.
+
+YAFFS
+-----
+
+YAFFS is the only file system, under any operating system, that has been designed specifically for use with NAND flash. YAFFS is thus designed to work within the constraints of, and exploit the features of, NAND flash to maximise performance. YAFFS uses journaling, error correction and verification techniques tuned to the way NAND typically fails, to enhance robustness. The result is a file system that exploits low-cost NAND chips and is both fast and robust. YAFFS is highly portable and runs under Linux, ucLinux and Windows CE. YAFFS is an open source project.
+
+The lead-up to YAFFS started with an investigation into modifying the JFFS2 flash file system to work with NAND flash (**) for some Aleph One customers. It seemed reasonable that the best way to get a file system for NAND flash would be just "tweaking" an existing flash file system. On deeper investigation, it became apparent that designing a new file system specifically for NAND might have some benefits.
+
+
 

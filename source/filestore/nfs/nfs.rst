@@ -230,26 +230,6 @@ Turn on/off NLM Manual connection tracking
 *    NLM_TRACK_CONN - can take values of 0/1, '1' will enable this features any other value will disable this
 *    NLM_TRACK_CONN_USE_ONLY_HOSTNAMES - can take values 0/1, '1'' will disable use of ips if reverse-name lookup does not work, any other value will enable use of ips 
 
-/proc/locks
------------
-Reference : http://www.centos.org/docs/5/html/Deployment_Guide-en-US/s1-proc-topfiles.html
-
-This file displays the files currently locked by the kernel. The contents of this file contain internal kernel debugging data and can vary tremendously, depending on the use of the system. A sample /proc/locks file for a lightly loaded system looks similar to the following:
-
-::
-
-        1: POSIX  ADVISORY  WRITE 3568 fd:00:2531452 0 EOF 
-        2: FLOCK  ADVISORY  WRITE 3517 fd:00:2531448 0 EOF 
-        3: POSIX  ADVISORY  WRITE 3452 fd:00:2531442 0 EOF 
-        4: POSIX  ADVISORY  WRITE 3443 fd:00:2531440 0 EOF 
-        5: POSIX  ADVISORY  WRITE 3326 fd:00:2531430 0 EOF 
-        6: POSIX  ADVISORY  WRITE 3175 fd:00:2531425 0 EOF 
-        7: POSIX  ADVISORY  WRITE 3056 fd:00:2548663 0 EOF
-
-Each lock has its own line which starts with a unique number. The second column refers to the class of lock used, with FLOCK signifying the older-style UNIX file locks from a flock system call and POSIX representing the newer POSIX locks from the lockf system call.
-
-The third column can have two values: ADVISORY or MANDATORY. ADVISORY means that the lock does not prevent other people from accessing the data; it only prevents other attempts to lock it. MANDATORY means that no other access to the data is permitted while the lock is held. The fourth column reveals whether the lock is allowing the holder READ or WRITE access to the file. The fifth column shows the ID of the process holding the lock. The sixth column shows the ID of the file being locked, in the format of MAJOR-DEVICE:MINOR-DEVICE:INODE-NUMBER. The seventh and eighth column shows the start and end of the file's locked region. 
-
 NFS Internal FSID
 -----------------
 
@@ -1325,5 +1305,110 @@ https://bugzilla.redhat.com/show_bug.cgi?id=469848
 
 It was fixed in some kernels to not wait for the writes to complete but seems to have been reverted back.
 
+
+NFS related /proc variables
+---------------------------
+
+====================
+nfsd_debug/rpc_debug
+====================
+
+To enable logging of all operations being received by NFS server
+
+::
+	
+	echo 16 > /proc/sys/sunrpc/nfsd_debug
+
+To enable logging of all RPCs being queued and how they are being transmitted
+
+::
+
+	echo 3 > /proc/sys/sunrpc/rpc_debug
+
+===========
+/proc/locks
+===========
+
+Reference : http://www.centos.org/docs/5/html/Deployment_Guide-en-US/s1-proc-topfiles.html
+
+This file displays the files currently locked by the kernel. The contents of this file contain internal kernel debugging data and can vary tremendously, depending on the use of the system. A sample /proc/locks file for a lightly loaded system looks similar to the following:
+
+::
+
+        1: POSIX  ADVISORY  WRITE 3568 fd:00:2531452 0 EOF 
+        2: FLOCK  ADVISORY  WRITE 3517 fd:00:2531448 0 EOF 
+        3: POSIX  ADVISORY  WRITE 3452 fd:00:2531442 0 EOF 
+        4: POSIX  ADVISORY  WRITE 3443 fd:00:2531440 0 EOF 
+        5: POSIX  ADVISORY  WRITE 3326 fd:00:2531430 0 EOF 
+        6: POSIX  ADVISORY  WRITE 3175 fd:00:2531425 0 EOF 
+        7: POSIX  ADVISORY  WRITE 3056 fd:00:2548663 0 EOF
+
+Each lock has its own line which starts with a unique number. The second column refers to the class of lock used, with FLOCK signifying the older-style UNIX file locks from a flock system call and POSIX representing the newer POSIX locks from the lockf system call.
+
+The third column can have two values: ADVISORY or MANDATORY. ADVISORY means that the lock does not prevent other people from accessing the data; it only prevents other attempts to lock it. MANDATORY means that no other access to the data is permitted while the lock is held. The fourth column reveals whether the lock is allowing the holder READ or WRITE access to the file. The fifth column shows the ID of the process holding the lock. The sixth column shows the ID of the file being locked, in the format of MAJOR-DEVICE:MINOR-DEVICE:INODE-NUMBER. The seventh and eighth column shows the start and end of the file's locked region. 
+
+========================
+/proc/sys/vm/drop_caches
+========================
+
+Starting with the 2.6.16 linux kernel /proc/sys/vm/drop_caches was made available to users. Echoing different values to this file instructs the kernel to drop various aspects of caches. For example:
+
+To free kernel page cache:
+
+**# echo 1 > /proc/sys/vm/drop_caches**
+
+To free dentries and inodes:
+
+**# echo 2 > /proc/sys/vm/drop_caches**
+
+To free kernel page cache, dentries and inodes:
+
+**# echo 3 > /proc/sys/vm/drop_caches**
+
+As this is a non-destructive operation, and dirty objects are not freeable, the user should run "sync" first in order to make sure all cached objects are freed
+
+On **NFS Server with VxFS** this is not effective, as VxFS buffers do not freed with this variable. Read the node related to this at http://www.symantec.com/business/support/index?page=content&id=HOWTO42135
+
+**Note** : Note that at this time kernel page cache being used by VxFS is NOT cleared via use of /proc/sys/vm/drop_caches. The only way in which to release kernel page cache used by VxFS is to unmount VxFS file systems. Note, however, that as described above, this should not cause an issue as cached memory remains allocatable with no perceptible overhead.
+
+So on the server the proc variable does not remove the buffers
+
+On VxFS (NFS server), the below sample output shows that the buffers are not freed, and we get the same performance as we get for in-memory reads even after asking for caches to be dropped.
+
+::
+
+	dellpe12_01:/vx/fs_fc # dd of=/dev/null if=testfile bs=512k count=2000
+	2000+0 records in
+	2000+0 records out
+	1048576000 bytes (1.0 GB) copied, 7.77505 s, 135 MB/s
+	dellpe12_01:/vx/fs_fc # dd of=/dev/null if=testfile bs=512k count=2000
+	2000+0 records in
+	2000+0 records out
+	1048576000 bytes (1.0 GB) copied, 0.429911 s, 2.4 GB/s
+	dellpe12_01:/vx/fs_fc # echo 3 > /proc/sys/vm/drop_caches
+	dellpe12_01:/vx/fs_fc # dd of=/dev/null if=testfile bs=512k count=2000
+	2000+0 records in
+	2000+0 records out
+	1048576000 bytes (1.0 GB) copied, 0.423017 s, 2.5 GB/s
+	dellpe12_01:/vx/fs_fc # 
+
+On NFS Client side, the **drop_caches** will flush NFS client caches, and during the next read the client would fetch the blocks from the server over network
+
+::
+
+	dellpe12_02:/mnt/nfs # dd of=/dev/null if=testfile bs=512k count=2000
+	2000+0 records in
+	2000+0 records out
+	1048576000 bytes (1.0 GB) copied, 9.8471 s, 106 MB/s
+	dellpe12_02:/mnt/nfs # dd of=/dev/null if=testfile bs=512k count=2000
+	2000+0 records in
+	2000+0 records out
+	1048576000 bytes (1.0 GB) copied, 0.443357 s, 2.4 GB/s
+	dellpe12_02:/mnt/nfs # echo 3 > /proc/sys/vm/drop_caches
+	dellpe12_02:/mnt/nfs # dd of=/dev/null if=testfile bs=512k count=2000
+	2000+0 records in
+	2000+0 records out
+	1048576000 bytes (1.0 GB) copied, 8.84747 s, 119 MB/s
+	dellpe12_02:/mnt/nfs # 
 
 
