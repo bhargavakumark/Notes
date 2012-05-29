@@ -351,3 +351,24 @@ Increasing it to 6 threads can bring your device max utilisation
 
 But it will never as good as cached writes, but they will use far less memory and CPU resource by avoiding cache copies
 
+CFS Disk Layout
+---------------
+
+.. image:: images/cfs.disk.layout.jpg
+
+CFS Delegation
+--------------
+
+* To prevent multiple nodes attempting to update the same metadata at the same time, a concept of metadata 'delegation' was also introduced. 
+* For example for inodes the unit of delegation is an Inode Allocation Unit (IAU) and for extent allocation/freeing the unit of delegation is an Extent Allocation Unit (EAU
+* Delegate metadata to nodes for inode updates using IAUs as the delegation unit, and for extent allocation and freeing by using EAUs as the delegation unit.
+* The primary holds lists of delegations that are currently not delegated to any node. Each primary and secondary mount on a node has a list of the delegations it currently has delegated. Further states also exist
+
+Delegation Algorithm basics
+
+
+1. A node in cluster which needs to do allocation, first looks in its current local list of delegations to see if it has sufficient space to allocate from those EAUs.
+2. If it has that storage in currently delegated EAUs, it allocates without going to primary and updates its intent log.
+3. If it doesn't have enough blocks in its currently delegated EAUs, it request the primary to give delegation of a new EAU having that much of space by calling VX_GET_DELE.
+4. Primary has the complete list of AUs so it knows which AU is where currently. Now depending on where the AU is primary can do the following:
+
