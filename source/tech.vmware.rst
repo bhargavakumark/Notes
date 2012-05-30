@@ -15,9 +15,26 @@ on any terminal in X sessiona
 
 Configure Shared Disk Resources
 -------------------------------
-The way to spoof your virtual machines into believing that they have access to shared disk resources. In my quest for clustering I found two resources on this, one was hideously outdated - but contained enough theory to help me out, The other was for version 4.5x and was missing one critical piece of data that is apparently now needed in VMWare Workstation 5.0. The key concepts here are that you just need to create SCSI controllers on both machines, and then provide directives that tell VMWare NOT to lock the disks when they are connected. This lets machines share disks, as long as all of the SCSI connection info is configured correctly. From there you just need to, obviously, make sure that the disks aren't busy trying to dynamically allocate size; i.e. the disks have to be fixed or each VM will see a different size, state, etc.
+The way to spoof your virtual machines into believing that they have 
+access to shared disk resources. In my quest for clustering I found 
+two resources on this, one was hideously outdated - but contained 
+enough theory to help me out, The other was for version 4.5x and was 
+missing one critical piece of data that is apparently now needed in 
+VMWare Workstation 5.0. The key concepts here are that you just need 
+to create SCSI controllers on both machines, and then provide 
+directives that tell VMWare NOT to lock the disks when they are 
+connected. This lets machines share disks, as long as all of the 
+SCSI connection info is configured correctly. From there you just 
+need to, obviously, make sure that the disks aren't busy trying to 
+dynamically allocate size; i.e. the disks have to be fixed or each 
+VM will see a different size, state, etc.
 
-The first thing you need to do is create some drives that you'll hook up to your machines. The best way to do this is to just create them with the wizard by 'adding' them to one of your machines, and then immediately removing them. Think of it as a virtual-hard-drive-egg-laying-chicken (or just think of it as a way to make virtual hard drives, if that's easier). To Proceed:
+The first thing you need to do is create some drives that you'll hook 
+up to your machines. The best way to do this is to just create them 
+with the wizard by 'adding' them to one of your machines, and then 
+immediately removing them. Think of it as a 
+virtual-hard-drive-egg-laying-chicken (or just think of it as a way 
+to make virtual hard drives, if that's easier). To Proceed:
 
 *    Open up one of your VMs and Select VM | Settings from the menu. To add the drives just click Add and use the Wizard.
 *    The first drive will be your Quorum drive, and just needs to be a few hundred MB (200 MB will work fine - or .2GB).
@@ -28,7 +45,9 @@ The first thing you need to do is create some drives that you'll hook up to your
 
 Attaching Shared Disks
 ----------------------
-Add your virtual shared drives to the boxes by hand. Now that the drives are sized and created, it's time to head to the virtual server rack and hook up some virtual SCSI controllers.
+Add your virtual shared drives to the boxes by hand. Now that the 
+drives are sized and created, it's time to head to the virtual 
+server rack and hook up some virtual SCSI controllers.
 
 *    Navigate to the directories where your Virtual Machines are kept, and for Server 1 open the .vmx file in NotePad.
 *    First add some instructions for disk control, and to make sure that the VM won't attempt to lock the drives it connects to:
@@ -114,3 +133,4 @@ Ensure Drive connectivity from both Servers
 *    Power down BOTH of your server nodes.
 *    Power up BOTH of your server nodes
 *    You should see your new drives available
+

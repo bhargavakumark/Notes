@@ -5,28 +5,50 @@ Linux : PAM
 
 Conf files
 ----------
-- /etc/pam.conf
-- /etc/pam.d/
 
-This dynamic configuration is set by the contents of the single Linux-PAM configuration file /etc/pam.conf. Alternatively, the configuration can be set by individual configuration files located in the /etc/pam.d/ directory. The presence of this directory will cause Linux-PAM to ignore /etc/pam.conf.
+* /etc/pam.conf
+* /etc/pam.d/
 
- account
-   this module type performs non-authentication based account management. It is typically used to restrict/permit access to a service based on the time of day, currently available system resources (maximum number of users) or perhaps the location of the applicant user -- ´root´ login only on the console.
+This dynamic configuration is set by the contents of the single 
+Linux-PAM configuration file /etc/pam.conf. Alternatively, the 
+configuration can be set by individual configuration files 
+located in the /etc/pam.d/ directory. The presence of this 
+directory will cause Linux-PAM to ignore /etc/pam.conf.
 
- auth
-   this module type provides two aspects of authenticating the user. Firstly, it establishes that the user is who they claim to be, by instructing the application to prompt the user for a password or other means of identification. Secondly, the module can grant group membership or other privileges through its credential granting properties.
+**account**
+	this module type performs non-authentication based account 
+	management. It is typically used to restrict/permit access 
+	to a service based on the time of day, currently available 
+	system resources (maximum number of users) or perhaps the 
+	location of the applicant user -- ´root´ login only on the 
+	console.
 
- password
-   this module type is required for updating the authentication token associated with the user. Typically, there is one module for each ´challenge/response´ based authentication (auth) type.
+**auth**
+	this module type provides two aspects of authenticating the 
+	user. Firstly, it establishes that the user is who they 
+	claim to be, by instructing the application to prompt the 
+	user for a password or other means of identification. 
+	Secondly, the module can grant group membership or other 
+	privileges through its credential granting properties.
 
- session
-   this module type is associated with doing things that need to be done for the user before/after they can be given service. Such things include the logging of information concerning the opening/closing of some data exchange with a user, mounting directories, etc.
+**password**
+	this module type is required for updating the authentication 
+	token associated with the user. Typically, there is one 
+	module for each ´challenge/response´ based authentication 
+	(auth) type.
+
+**session**
+	this module type is associated with doing things that need 
+	to be done for the user before/after they can be given 
+	service. Such things include the logging of information 
+	concerning the opening/closing of some data exchange with 
+	a user, mounting directories, etc.
 
 man Pages
 ---------
 
-- man pam
-- man pam.conf
+* man pam
+* man pam.conf
 
 FileStore Notes
 ---------------

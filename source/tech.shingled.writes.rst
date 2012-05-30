@@ -8,9 +8,9 @@ overlaps the currently written track with the previous track.
 Random reads are still possible on such devices, but writes must
 be done largely sequentially.
 
-However, current disk drives store 400 GB/in2 , and are rapidly approaching
-the density limit imposed by the super-paramagnetic effect for
-perpendicular recording, estimated to be about 1 Tb/in2
+However, current disk drives store 400 GB/in2 , and are rapidly 
+approaching the density limit imposed by the super-paramagnetic 
+effect for perpendicular recording, estimated to be about 1 Tb/in2
 
 The dramatic improvements in disk data density will even-
 tually be limited by the superparamagnetic effect, which
