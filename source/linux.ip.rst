@@ -65,9 +65,24 @@ add : Adding IP addresses to an interface with ip address
             inet 192.168.99.35/24 brd 192.168.99.255 scope global eth0
             inet 192.168.99.37/24 brd 192.168.99.255 scope global secondary eth0
 
-There are a few items of note. You can use ip address add even if the link layer on the device is down. This means that you can readdress an interface without bringing it up. When you add an address within the same CIDR network as another address on the same interface, the second address becomes a secondary address, meaning that if the first address is removed, the second address will also be purged from the interface.
+There are a few items of note. You can use ip address add even if the 
+link layer on the device is down. This means that you can readdress an 
+interface without bringing it up. When you add an address within the 
+same CIDR network as another address on the same interface, the second 
+address becomes a secondary address, meaning that if the first address 
+is removed, the second address will also be purged from the interface.
 
-In order to support compatibility with ifconfig the ip address command allows the user to specify a label on every hosted address on a given device. After adding an address to an interface as we did in Example C.7, “Adding IP addresses to an interface with ip address”, ifconfig will not report that the new IP 192.168.99.37 is hosted on the same device as the primary IP 192.168.99.35. In order to prevent this sort of confusion or apparently contradictory output, you should get in the habit of using the label option to identify each IP hosted on a device. Let's take a look at how to remove the 192.168.99.37 IP from eth0 and add it back so that ifconfig will report the presence of another IP on the eth0 device.
+In order to support compatibility with ifconfig the ip address command 
+allows the user to specify a label on every hosted address on a given 
+device. After adding an address to an interface as we did in Example C.7, 
+“Adding IP addresses to an interface with ip address”, ifconfig will not 
+report that the new IP 192.168.99.37 is hosted on the same device as 
+the primary IP 192.168.99.35. In order to prevent this sort of 
+confusion or apparently contradictory output, you should get in the 
+habit of using the label option to identify each IP hosted on a device. 
+Let's take a look at how to remove the 192.168.99.37 IP from eth0 and 
+add it back so that ifconfig will report the presence of another IP 
+on the eth0 device.
 
 ==============================================================
 remove : Removing IP addresses from interfaces with ip address
@@ -175,7 +190,11 @@ ip link
         2: eth0: <BROADCAST,MULTICAST,UP> mtu 1500 qdisc pfifo_fast qlen 100
             link/ether 00:80:c8:f8:4a:51 brd ff:ff:ff:ff:ff:ff
 
-Line one summarizes the current name of the device, the flags set on the device, the maximum transmission unit (MTU) the active queueing mechanism (if any), and the queue size if there is a queue present. The second line will always indicate the type of link layer in use on the device, and link layer specific information.
+Line one summarizes the current name of the device, the flags set on 
+the device, the maximum transmission unit (MTU) the active queueing 
+mechanism (if any), and the queue size if there is a queue present. 
+The second line will always indicate the type of link layer in use on 
+the device, and link layer specific information.
 
 ::
     
@@ -377,11 +396,24 @@ show local : Viewing the local routing table with ip route show table local
         local 127.0.0.0/8 dev lo  proto kernel  scope host  src 127.0.0.1
 
 
-The first field in this output tells us whether the route is for a broadcast address or an IP address or range locally hosted on this machine. Subsequent fields inform us through which device the destination is reachable, and notably (in this table) that the kernel has added these routes as part of bringing up the IP layer interfaces.
+The first field in this output tells us whether the route is for a 
+broadcast address or an IP address or range locally hosted on this 
+machine. Subsequent fields inform us through which device the 
+destination is reachable, and notably (in this table) that the kernel 
+has added these routes as part of bringing up the IP layer interfaces.
 
-For each IP hosted on the machine, it makes sense that the machine should restrict accessiblity to that IP or IP range to itself only. This explains why, in Example D.12, Viewing the local routing table with ip route show table local, 192.168.99.35 has a host scope. Because tristan hosts this IP, there's no reason for the packet to be routed off the box. Similarly, a destination of localhost (127.0.0.1) does not need to be forwarded off this machine. In each of these cases, the scope has been set to host.
+For each IP hosted on the machine, it makes sense that the machine 
+should restrict accessiblity to that IP or IP range to itself only. 
+This explains why, in Example D.12, Viewing the local routing table 
+with ip route show table local, 192.168.99.35 has a host scope. 
+Because tristan hosts this IP, there's no reason for the packet to 
+be routed off the box. Similarly, a destination of localhost 
+(127.0.0.1) does not need to be forwarded off this machine. In 
+each of these cases, the scope has been set to host.
 
-For broadcast addresses, which are intended for any listeners who happen to share the IP network, the destination only makes sense as for a scope of devices connected to the same link layer [49].
+For broadcast addresses, which are intended for any listeners who 
+happen to share the IP network, the destination only makes sense 
+as for a scope of devices connected to the same link layer.
 
 =============================================================
 show table : Viewing a routing table with ip route show table
@@ -422,7 +454,13 @@ show stats : Displaying statistics from the routing cache with ip -s route show 
         192.168.100.17 via 192.168.99.254 dev eth0  src 192.168.99.35 
             cache  users 1 used 326 age 12sec mtu 1500 advmss 1460
 
-With this output, you'll get just a bit more information about the routes. The most interesting datum is usually the "used" field, which indicates the number of times this route has been accessed in the routing cache. This can give you a very good idea of how many times a particular route has been used. The age field is used by the kernel to decide when to expire a cache entry. The age is reset every time the route is accessed
+With this output, you'll get just a bit more information about the 
+routes. The most interesting datum is usually the "used" field, which 
+indicates the number of times this route has been accessed in the 
+routing cache. This can give you a very good idea of how many times 
+a particular route has been used. The age field is used by the kernel 
+to decide when to expire a cache entry. The age is reset every time 
+the route is accessed
 
 ==============================================================
 add static : Adding a static route to a network with route add
@@ -521,7 +559,11 @@ change : Altering existing routes with ip route change
 get : Testing routing tables with ip route get
 ==============================================
 
-ip route get simulates a request for the specified destination, ip route get causes the routing selection algorithm to be run. When this is complete, it prints out the resulting path to the destination. In one sense, this is almost equivalent to sending an ICMP echo request packet and then using ip route show cache.
+ip route get simulates a request for the specified destination, ip 
+route get causes the routing selection algorithm to be run. When this 
+is complete, it prints out the resulting path to the destination. 
+In one sense, this is almost equivalent to sending an ICMP echo 
+request packet and then using ip route show cache.
 
 ::
 
@@ -540,7 +582,8 @@ ip route get simulates a request for the specified destination, ip route get cau
 flush : Removing a specific route and emptying a routing table with ip route flush
 ==================================================================================
 
-The flush option, when used with ip route empties a routing table or removes the route for a particular destination
+The flush option, when used with ip route empties a routing table 
+or removes the route for a particular destination
 
 ::
 

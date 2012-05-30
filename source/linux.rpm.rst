@@ -28,7 +28,9 @@ Listing files in a rpm file
 
 Extracting source from a rpm
 ----------------------------
-Install source rpm, which will create files in /usr/src/packages/SOURCES (patches) and /usr/src/packages/BUILD
+Install source rpm, which will create files in 
+/usr/src/packages/SOURCES (patches) and 
+/usr/src/packages/BUILD
 
 ::
         

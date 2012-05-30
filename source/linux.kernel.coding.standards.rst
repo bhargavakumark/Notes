@@ -114,7 +114,8 @@ Spaces
 
 Functions
 ---------
-The maximum length of a function is inversely proportional to the complexity and indentation level of that function.
+The maximum length of a function is inversely proportional to the 
+complexity and indentation level of that function.
 
 ::
 
@@ -134,17 +135,22 @@ The maximum length of a function is inversely proportional to the complexity and
 
 Function Prototypes
 -------------------
-In function prototypes, include parameter names with their data types. Although this is not required by the C language, it is preferred in Linux because it is a simple way to add valuable information for the reader.
+In function prototypes, include parameter names with their data types. 
+Although this is not required by the C language, it is preferred in 
+Linux because it is a simple way to add valuable information for the 
+reader.
 
 GOTOs for exiting
 -----------------
-The goto statement comes in handy when a function exits from multiple locations and some common work such as cleanup has to be done.
+The goto statement comes in handy when a function exits from multiple 
+locations and some common work such as cleanup has to be done.
 
 The rationale is:
 
 *    unconditional statements are easier to understand and follow
 *    nesting is reduced
-*    errors by not updating individual exit points when making modifications are prevented
+*    errors by not updating individual exit points when making 
+     modifications are prevented
 *    saves the compiler work to optimize redundant code away
 
 ::
@@ -192,9 +198,9 @@ Macros
 
 *    Names of macros defining constants and labels in enums are capitalized.
 
-::
+	::
 
-        #define CONSTANT 0x12345
+		#define CONSTANT 0x12345
 
 *    Enums are preferred when defining several related constants.
 *    CAPITALIZED macro names are appreciated but macros resembling functions
@@ -204,45 +210,49 @@ may be named in lower case.
 *    Generally, inline functions are preferable to macros resembling functions.
 *    Macros with multiple statements should be enclosed in a do - while block:
 
-::
+	::
 
-        #define macrofun(a, b, c)                       \
-                do {                                    \
-                        if (a == 5)                     \
-                                do_this(b, c);          \
-                } while (0)
+		#define macrofun(a, b, c)                       \
+			do {                                    \
+				if (a == 5)                     \
+					do_this(b, c);          \
+			} while (0)
 
 
 *   Things to avoid when using macros:
 
    *    macros that affect control flow is a _very_ bad idea. It looks like a function call but exits the "calling" function; don't break the internal parsers of those who will read the code.
 
-::
+	::
 
-        #define FOO(x)                                  \
-                do {                                    \
-                        if (blah(x) < 0)                \
-                                return -EBUGGERED;      \
-                } while(0)
+		#define FOO(x)                                  \
+			do {                                    \
+				if (blah(x) < 0)                \
+					return -EBUGGERED;      \
+			} while(0)
+
 
    *    macros that depend on having a local variable with a magic name might look like a good thing, but it's confusing as hell when one reads the code and it's prone to breakage from seemingly innocent changes.
 
-::
+	::
 
-        #define FOO(val) bar(index, val)
+		#define FOO(val) bar(index, val)
 
    *    macros with arguments that are used as l-values: FOO(x) = y; will bite you if somebody e.g. turns FOO into an inline function.
    *    forgetting about precedence: macros defining constants using expressions must enclose the expression in parentheses. Beware of similar issues with macros using parameters.
 
-::
+	::
 
-        #define CONSTANT 0x4000
-        #define CONSTEXP (CONSTANT | 3)
+		#define CONSTANT 0x4000
+		#define CONSTEXP (CONSTANT | 3)
 
 
 Allocating memory
 -----------------
-The kernel provides the following general purpose memory allocators:kmalloc(), kzalloc(), kcalloc(), and vmalloc(). Please refer to the API documentation for further information about them.
+
+The kernel provides the following general purpose memory 
+allocators:kmalloc(), kzalloc(), kcalloc(), and vmalloc(). 
+Please refer to the API documentation for further information about them.
 
 The preferred form for passing a size of a struct is the following:
 
@@ -250,27 +260,52 @@ The preferred form for passing a size of a struct is the following:
 
         p = kmalloc(sizeof(*p), ...);
 
-The alternative form where struct name is spelled out hurts readability and introduces an opportunity for a bug when the pointer variable type is changed but the corresponding sizeof that is passed to a memory allocator is not.
+The alternative form where struct name is spelled out hurts readability 
+and introduces an opportunity for a bug when the pointer variable type 
+is changed but the corresponding sizeof that is passed to a memory 
+allocator is not.
 
-**sting the return value** which is a void pointer is **redundant**. The conversion from void pointer to any other pointer type is guaranteed by the C programming language.
+**sting the return value** which is a void pointer is **redundant**. 
+The conversion from void pointer to any other pointer type is 
+guaranteed by the C programming language.
 
 inline
 ------
 
-*    Abundant use of the inline keyword leads to a much bigger kernel, which in turn slows the system as a whole down, due to a bigger icache footprint for the CPU and simply because there is less memory available for the pagecache. Just think about it; a pagecache miss causes a disk seek, which easily takes 5 miliseconds. There are a LOT of cpu cycles that can go into these 5 miliseconds.
-*    A reasonable rule of thumb is to not put inline at functions that have more than 3 lines of code in them.
-*    Often people argue that adding inline to functions that are static and used only once is always a win since there is no space tradeoff. While this is technically correct, gcc is capable of inlining these automatically without help, and the maintenance issue of removing the inline when a second user appears outweighs the potential value of the hint that tells gcc to do something it would have done anyway.
+*	Abundant use of the inline keyword leads to a much bigger kernel, 
+	which in turn slows the system as a whole down, due to a bigger 
+	icache footprint for the CPU and simply because there is less 
+	memory available for the pagecache. Just think about it; a 
+	pagecache miss causes a disk seek, which easily takes 5 
+	miliseconds. There are a LOT of cpu cycles that can go into 
+	these 5 miliseconds.
+
+*	A reasonable rule of thumb is to not put inline at functions 
+	that have more than 3 lines of code in them.
+
+*	Often people argue that adding inline to functions that are 
+	static and used only once is always a win since there is no space 
+	tradeoff. While this is technically correct, gcc is capable of 
+	inlining these automatically without help, and the maintenance 
+	issue of removing the inline when a second user appears 
+	outweighs the potential value of the hint that tells gcc to 
+	do something it would have done anyway.
 
 
 Function return values
 ----------------------
-Functions can return values of many different kinds, and one of the most common are
+Functions can return values of many different kinds, and one of the 
+most common are
 
-*    value indicating whether the function succeeded or failed. Such a value can be represented as an error-code integer (**-Exxx = failure, 0 = success**)
-*    a succeeded **boolean (0 = failure, non-zero = success)**.
+*	value indicating whether the function succeeded or failed. 
+	Such a value can be represented as an error-code integer 
+	(**-Exxx = failure, 0 = success**)
 
+*	a succeeded **boolean (0 = failure, non-zero = success)**.
 
-If the name of a function is an action or an imperative command, the function should return an error-code integer. If the name is a predicate, the function should return a succeeded boolean.
+If the name of a function is an action or an imperative command, 
+the function should return an error-code integer. If the name is 
+a predicate, the function should return a succeeded boolean.
 
 ::
 

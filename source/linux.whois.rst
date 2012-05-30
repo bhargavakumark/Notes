@@ -1,9 +1,17 @@
 Linux : whois
 =============
 
-The whois service can also help you figure out the purpose of a given domain. Unfortunately, there are many whois serversmost good administrators of top-level domains run oneand they don't talk to each other like nameservers do. Consequently, the first step to using whois is finding the right whois server.
+The whois service can also help you figure out the purpose of a 
+given domain. Unfortunately, there are many whois serversmost good 
+administrators of top-level domains run oneand they don't talk to 
+each other like nameservers do. Consequently, the first step to 
+using whois is finding the right whois server.
 
-One of the easiest places to start your search for the right whois server is at http://www.allwhois.com (Figure 3-1). We mentioned earlier that this site has a list of the web sites for each country code's top-level domain; it also sports a unified whois search facility.
+One of the easiest places to start your search for the right whois 
+server is at http://www.allwhois.com (Figure 3-1). We mentioned 
+earlier that this site has a list of the web sites for each country 
+code's top-level domain; it also sports a unified whois search 
+facility.
 
 ::
 

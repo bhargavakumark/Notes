@@ -3,7 +3,11 @@ Linux : netstat
 
 netstat
 -------
-One of the most common uses of the netstat utility is to determine the state of sockets on a machine. There are many questions that netstat can answer with the right set of options. Here's a list of some of the things different things we can learn.
+
+One of the most common uses of the netstat utility is to determine 
+the state of sockets on a machine. There are many questions that 
+netstat can answer with the right set of options. Here's a list of 
+some of the things different things we can learn.
 
 *     which services are listening on which sockets
 *     what process (and controlling PID) is listening on a given socket
@@ -11,16 +15,28 @@ One of the most common uses of the netstat utility is to determine the state of 
 *     what connections are currently established to which sockets 
 
 
-By invoking netstat without any options, you are asking for a list of all currently open connections to and from the networking stack on the local machine. This means IP network connections, unix domain sockets, IPX sockets and Appletalk sockets among others.
+By invoking netstat without any options, you are asking for a list 
+of all currently open connections to and from the networking stack 
+on the local machine. This means IP network connections, unix domain 
+sockets, IPX sockets and Appletalk sockets among others.
 
-A convenient feature of netstat is its ability to differentiate between two different sorts of name lookup. Normally the -n specifies no name lookup, but this is ambiguous when there are hostnames, port names, and user names. Fortunately, netstat offers the following options to differentiate the different forms of lookup and suppress only the [un-]desired lookup.
+A convenient feature of netstat is its ability to differentiate 
+between two different sorts of name lookup. Normally the -n 
+specifies no name lookup, but this is ambiguous when there are 
+hostnames, port names, and user names. Fortunately, netstat offers 
+the following options to differentiate the different forms of 
+lookup and suppress only the [un-]desired lookup.
 
 *     --numeric-hosts
 *     --numeric-ports
 *     --numeric-users
 
 
-The option -n, suppress all hostname, port name and username lookup, and is a synonym for --numeric. I'll reiterate that hostnames and DNS in particular can be confusing, or worse, misleading when trying to diagnose or debug a networking related issue, so it is wise to suppress hostname lookups in these sorts of situations.
+The option -n, suppress all hostname, port name and username lookup, 
+and is a synonym for --numeric. I'll reiterate that hostnames and 
+DNS in particular can be confusing, or worse, misleading when trying 
+to diagnose or debug a networking related issue, so it is wise to 
+suppress hostname lookups in these sorts of situations.
 
 Displaying IP socket status with netstat
 ----------------------------------------
@@ -53,11 +69,27 @@ Displaying IP socket status with netstat
         tcp        0      0 192.168.98.82:44320     192.168.100:netbios-ssn ~TIME_WAIT
 
 
-netstat abbreviates the IP endpoint in order to reproduce the entire string retrieved from the port lookup (in /etc/services). Also interestingly, this line conveys to us (in the first output) that the kernel is waiting for the remote endpoint to acknowledge the 192 bytes which are still in the Send-Q buffer.
+netstat abbreviates the IP endpoint in order to reproduce the entire 
+string retrieved from the port lookup (in /etc/services). Also 
+interestingly, this line conveys to us (in the first output) that the 
+kernel is waiting for the remote endpoint to acknowledge the 192 bytes 
+which are still in the Send-Q buffer.
 
-The first line describes a TCP connection to the IP locally hosted on morgan's Ethernet interface. The connection was initiated from an ephemeral port (40991) on tristan to a service running on port 22. The service normally running on this well-known port is sshd, so we can conclude that somebody on tristan has connected to the morgan's ssh server. The second line describes a TCP session open to port 993 on isolde, which probably means that the user on morgan has an open connection to an IMAP over SSL server.
+The first line describes a TCP connection to the IP locally hosted on 
+morgan's Ethernet interface. The connection was initiated from an 
+ephemeral port (40991) on tristan to a service running on port 22. 
+The service normally running on this well-known port is sshd, so 
+we can conclude that somebody on tristan has connected to the 
+morgan's ssh server. The second line describes a TCP session open 
+to port 993 on isolde, which probably means that the user on morgan 
+has an open connection to an IMAP over SSL server.
 
-The final line of our netstatoutput shows a connection in the TIME_WAIT state, which means that the TCP sessions have been terminated, but the kernel is waiting for any packets which may still be left on the network for this session. It is not at all abnormal for sockets to be in a TIME_WAIT state for a short period of time after a TCP session has ended.
+The final line of our netstatoutput shows a connection in the 
+TIME_WAIT state, which means that the TCP sessions have been 
+terminated, but the kernel is waiting for any packets which may 
+still be left on the network for this session. It is not at all 
+abnormal for sockets to be in a TIME_WAIT state for a short period 
+of time after a TCP session has ended.
 
 Displaying IP socket status details with netstat
 ------------------------------------------------

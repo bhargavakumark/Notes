@@ -3,7 +3,8 @@ Linux : nc
 
 .. contents::
 
-nc (pronounced net-cat). nc is one of a large number of tools for making a simple TCP connection.
+nc (pronounced net-cat). nc is one of a large number of tools for 
+making a simple TCP connection.
 
 Simple use of nc
 ----------------

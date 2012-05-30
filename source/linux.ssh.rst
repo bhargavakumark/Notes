@@ -6,7 +6,14 @@ Linux : SSH
 SSH Ask Password (SSH_ASKPASS)
 ------------------------------
 
-If ssh needs a passphrase, it will read the passphrase from the current terminal if it was run from a terminal. If ssh does not have a terminal associated with it but **DISPLAY** and **SSH_ASKPASS** are set, it will execute the program specified by SSH_ASKPASS and open an X11 window to read the passphrase. This is particularly useful when calling ssh from a .Xsession or related script. (Note that on some machines it may be necessary to redirect the input from /dev/null to make this work.)
+If ssh needs a passphrase, it will read the passphrase from the 
+current terminal if it was run from a terminal. If ssh does not 
+have a terminal associated with it but **DISPLAY** and 
+**SSH_ASKPASS** are set, it will execute the program specified by 
+SSH_ASKPASS and open an X11 window to read the passphrase. This 
+is particularly useful when calling ssh from a .Xsession or related 
+script. (Note that on some machines it may be necessary to redirect 
+the input from /dev/null to make this work.)
 
 ::
 
@@ -38,13 +45,16 @@ If ssh needs a passphrase, it will read the passphrase from the current terminal
 SSH Tunneling
 -------------
   
-To open a port on the remote server and let content on that port to be forwarded to local ssh port, so that users on the remote server can login to this machine
+To open a port on the remote server and let content on that port to 
+be forwarded to local ssh port, so that users on the remote server 
+can login to this machine
 
 ::
 
         ssh -R 1234:127.0.0.1:22 bhargava@10.216.50.132
 
-To open a port locally and forward any incoming connections on that port to a remoteserver on port 80
+To open a port locally and forward any incoming connections on that 
+port to a remoteserver on port 80
 
 ::
 

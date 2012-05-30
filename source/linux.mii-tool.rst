@@ -20,7 +20,13 @@ Ethernet Port Speed Abbreviations
 | 100baseTx-FD | 100 megabit full duplex  |
 +--------------+--------------------------+
 
-The raw number indicates the number of bits which can be exchanged between two Ethernet devices over the wire. So 10 megabit Ethernet can support the transmission of ten million bits per second. The suffix to each identifier indicates whether both hosts can send and receive simultaneously or not. Half duplex means that each device can either send or receive in the same instant. Full duplex means that both devices can send and receive simultaneously.
+The raw number indicates the number of bits which can be exchanged 
+between two Ethernet devices over the wire. So 10 megabit Ethernet 
+can support the transmission of ten million bits per second. The 
+suffix to each identifier indicates whether both hosts can send and 
+receive simultaneously or not. Half duplex means that each device 
+can either send or receive in the same instant. Full duplex means 
+that both devices can send and receive simultaneously.
 
 ::
 
