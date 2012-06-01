@@ -60,6 +60,14 @@ port to a remoteserver on port 80
 
         ssh -L 8080:www.google.com:80 bhargava@10.216.50.132
 
+===========
+Socks Proxy
+===========
+
+::
+
+	ssh -D 9999 username@ip-address-of-ssh-server
+
 Debug : sshd -d
 ---------------
 
