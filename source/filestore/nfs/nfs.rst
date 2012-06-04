@@ -6,6 +6,16 @@ NFS
 NLM Implementation
 ------------------
 
+==========
+Feferences
+==========
+
+NFSv2 specification which defined NLMv3
+	http://pubs.opengroup.org/onlinepubs/9629799/front.htm
+
+NFSv3 specification which defines changes between NLMv3 and NLMv4
+	https://www.ietf.org/rfc/rfc1813.txt
+
 ========
 NLMGroup
 ========

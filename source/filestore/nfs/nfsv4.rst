@@ -6,7 +6,14 @@ NFSv4
 References
 ----------
 
-https://www.ietf.org/rfc/rfc3530.txt
+NFSv4 RFC
+	https://www.ietf.org/rfc/rfc3530.txt
+
+NFSv4 vs NFSv3 comparison slides
+	http://www.citi.umich.edu/projects/nfsv4/OLS2001/sld011.htm
+
+NFSv4 ACL mapping
+	https://tools.ietf.org/html/draft-ietf-nfsv4-acl-mapping-05
 
 
 Security RPCSEC_GSS
@@ -391,12 +398,16 @@ access**.  For example,
 **ACE flag**
 
 *   ACE4_FILE_INHERIT_ACE
+	Inherit ACE to files created in this directory
 *   ACE4_DIRECTORY_INHERIT_ACE
+	Inherit ACE to directories created in this directory
 *   ACE4_INHERIT_ONLY_ACE
+	ACE should be ignored for this directory, only to be used for inheritance
 *   ACE4_NO_PROPAGATE_INHERIT_ACE
 *   ACE4_SUCCESSFUL_ACCESS_ACE_FLAG
 *   ACL4_FAILED_ACCESS_ACE_FLAG
 *   ACE4_IDENTIFIER_GROUP
+	"who" is a group (not user)
 
 **ACE who**
    There are several special identifiers ("who") which need to be
@@ -3297,4 +3308,61 @@ checking and AUTH_SYS identification can still be supported with the
 caveat that the AUTH_SYS flavor is neither MANDATORY nor RECOMMENDED
 by this specification, and so interoperability via AUTH_SYS is not
 assured.
+
+
+ACL Mapping
+-----------
+
+==========
+Posix ACLs
+==========
+
+POSIX ACLs use access masks with only the traditional "read",
+"write", and "execute" bits.  Each ACE in a POSIX ACL is one of five
+types: ACL_USER_OBJ, ACL_USER, ACL_GROUP_OBJ, ACL_GROUP, ACL_MASK,
+and ACL_OTHER.  Each ACL_USER ACE has a uid associated with it, and
+each ACL_GROUP ACE has a gid associated with it.  Every POSIX ACL
+must have exactly one ACL_USER_OBJ, ACL_GROUP_OBJ, and ACL_OTHER ACE,
+and at most one ACL_MASK ACE.  The ACL_MASK ACE is required if the
+ACL has any ACL_USER or ACL_GROUP ACEs.  There may not be two
+ACL_USER ACEs with the same uid, and there may not be two ACL_GROUP
+ACEs with the same gid.
+
+we never allow the ACL_USER, ACL_OWNER_OBJ, or
+ACL_GROUP objects to grant more than the ACL_MASK object does, and in
+the case of ACL_GROUP_OBJ and ACL_GROUP ACEs
+
+In more detail:
+
+1.  If the requester is the file owner, then allow or deny access
+    depending on whether the ACL_USER_OBJ ACE allows or denies it.
+    Otherwise,
+
+2.  if the requester matches the file's group, and the ACL mask ACE
+    would deny the requested access, then skip to step 5.  Otherwise,
+
+3.  if the requester's uid matches the uid of one of the ACL_USER
+    ACEs, then allow or deny access depending on whether the
+    ACL_USER_OBJ ACE allows or denies it.  Otherwise,
+
+4.  Consider the set of all ACL_GROUP ACEs whose gid the requester is
+    a member of.  Add to that set the ACL_GROUP_OBJ ACE, if the
+    requester is also a member of the file's group.  Allow access if
+    any ACE in the resulting set allows access.  If the set of
+    matching ACEs is nonempty, and none allow access, then deny
+    access.  Otherwise, if the set of matching ACEs is empty,
+
+5.  if the requester's access mask is allowed by the ACL_OTHER ACE,
+    then grant access.  Otherwise, deny access.
+
+Directories, however, may have two
+ACLs: one, the "access ACL", used to determine access to the
+directory, and one, the "default ACL", used only as the ACL to be
+inherited by newly created objects in the directory.
+
+POSIX ACLs are unordered
+
+
+Full details refer 
+	https://tools.ietf.org/html/draft-ietf-nfsv4-acl-mapping-05
 
