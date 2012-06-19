@@ -8,8 +8,14 @@ Prog : Perl
 References
 ----------
 
-- **Programming Perl** by **Larry Wall** second edition
-- **Learning Perl the Hard Way** by **Allen B. Downey**
+* **Programming Perl** by **Larry Wall** second edition
+* **Learning Perl the Hard Way** by **Allen B. Downey**
+* Perl threads  
+	* http://perldoc.perl.org/perlthrtut.html
+	* http://chicken.genouest.org/perl/multi-threading-with-perl/
+* Object Oriented Programming in Perl
+	* http://www.datadisk.co.uk/html_docs/perl/oop.htm
+	
 
 Perl Data Types
 ---------------
