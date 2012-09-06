@@ -15,6 +15,9 @@ NFSv4 vs NFSv3 comparison slides
 NFSv4 ACL mapping
 	https://tools.ietf.org/html/draft-ietf-nfsv4-acl-mapping-05
 
+Implementing Native NFSv4 ACLs in Linux
+        http://oss.sgi.com/projects/nfs/nfs4acl/lca2009-implementing-native-nfsv4-acls-in-linux-final.pdf
+
 
 Security RPCSEC_GSS
 -------------------
