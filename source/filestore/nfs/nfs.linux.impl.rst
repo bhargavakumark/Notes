@@ -282,9 +282,9 @@ Code :
 			# If no more references for this
 			# close the file pointer
 
-=========
-unlock_fs
-=========
+=================
+unlock_filesystem
+=================
 
 processed in **write_unlock_fs**
 
