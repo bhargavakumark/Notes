@@ -930,14 +930,15 @@ Examples
 
 ::
 
-        Capture all NFS traffic 
-        # tethereal -t a -n -i any -f 'port 2049' 
-        Capture all NFS traffic expcept loopback
-        # tethereal -t a -n -i any -f 'port 2049 and host not 127.0.0.1'
-        To capture all NFS unlink calls
-        # tethereal -t a -n -i any -f 'port 2049' -R "nfs and (rpc.procedure == 12)"
-        To capture error returns for nfs requests
-        # tethereal -t a -n -i any -f 'port 2049' -R "nfs and (nfs.nfsstat3 != NFS3_OK)"
+	Capture all NFS traffic 
+	# tethereal -t a -n -i any -f 'port 2049' 
+	Capture all NFS traffic expcept loopback
+	# tethereal -t a -n -i any -f 'port 2049 and host not 127.0.0.1'
+	To capture all NFS unlink calls
+	# tethereal -t a -n -i any -f 'port 2049' -R "nfs and (rpc.procedure == 12)"
+	To capture error returns for nfs requests
+	# tethereal -t a -n -i any -f 'port 2049' -R "nfs and (nfs.nfsstat3 != NFS3_OK)"
+	# tethereal -s 4096 -x -ne -v -i eth0 'host $client and ip[184:4] == 0x55555555
 
 
 Display filter reference for NFS
@@ -948,6 +949,8 @@ Display filter reference for NFS
 * http://wiki.wireshark.org/NFS_Preferences
 * http://docstore.mik.ua/orelly/networking_2ndEd/nfs/ch15_04.htm
 * https://bugzilla.redhat.com/show_bug.cgi?id=201211
+
+
 
 NFS handle format
 -----------------
@@ -973,7 +976,7 @@ Length  Bytes   Field Name              Meaning                                 
 
 If value of fsid_type is 0 then fsid length is 8 ....
 
-.. code-block:: c
+::
 
         194 static inline int key_len(int type)
         195 {
@@ -1294,7 +1297,7 @@ NFS Known Issues
 ls -l hangs when writing to a file
 ==================================
 
-.. code-block:: c
+::
 
         /*
          * Flush out writes to the server in order to update c/mtime.

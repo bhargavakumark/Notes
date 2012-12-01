@@ -9,6 +9,11 @@ Related Info :
 
 * http://monkey.org/~dugsong/dsniff/
 * http://www.tcpdump.org/pcap.htm
+* http://trac.evemu.org/browser/trunk/libs/libnet/sample/icmp6_echoreq.c?rev=45
+* http://libnet.sourcearchive.com/documentation/1.1.4-1/libnet-functions_8h_ace7ef7ee9dab7064eafc703bbd51c02.html#ace7ef7ee9dab7064eafc703bbd51c02
+* http://networksecurity.org.ua/0596007949/networkst-chp-11-sect-4.html
+* http://www.tcpdump.org/tcpdump_man.html
+* http://seclists.org/tcpdump/2010/q1/122
 
 sfs_tcp_reset
 -------------
