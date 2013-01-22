@@ -3,6 +3,11 @@ AIX
 
 .. contents::
 
+References
+----------
+
+* http://www.ibm.com/developerworks/aix/library/au-dutta_cmds.html
+
 System Information
 ------------------
 
@@ -219,6 +224,11 @@ List current paths for disks
     hdisk0,Enabled,vscsi0,810000000000
     hdisk0,Enabled,vscsi1,810000000000
 
+Remove a path
+
+::
+
+    rmpath -l hdisk0 -w 810000000000 -d
 
 
 JFS
@@ -279,6 +289,46 @@ LVM Maintenance Commands
 ========================
 
 * http://pic.dhe.ibm.com/infocenter/aix/v7r1/index.jsp?topic=%2Fcom.ibm.aix.baseadmn%2Fdoc%2Fbaseadmndita%2Fdm_mpio.htm
+
+==
+vg
+==
+
+::
+
+    mkvg -y name_of_volume_group -s partition_size list_of_hard_disks
+
+    lsvg
+
+    lsvg <vgname>       # to list vg info
+
+    lsvg -l <vgname>
+
+    lsvg -p <vgname>    # to list disks in vg
+
+    chvg
+
+    extendvg   VolumeGroupName   hdisk0 hdisk1 ... hdiskn   # add disks to vg
+
+    syncvg -p hdisk4 hdisk5
+    syncvg -v testvg            # sync stale pvs
+
+==
+lv
+==
+
+::
+
+    mklv -y name_of_logical_volume name_of_volume_group number_of_partition
+
+    lslv 
+    
+    lslv <lvname>       # list volume details
+
+    lslv -p <pv-name>   # list partitions for pv
+
+    rmlv <lvname>
+
 
 Package management Commands
 ---------------------------

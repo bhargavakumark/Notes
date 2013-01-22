@@ -3,6 +3,13 @@ Linux : LVM
 
 .. contents::
 
+References
+----------
+
+* LVM - http://www.markus-gattol.name/ws/lvm.html
+* A Beginner's Guide To LVM - http://www.howtoforge.com/linux_lvm_p3
+* Device-mapper - http://linuxgazette.net/114/kapil.html
+
 Features
 --------
 
@@ -78,11 +85,23 @@ Basic operations
 
 ::
 
+    pvscan
+
     pvcreate /dev/sdb1 /dev/sdc1 /dev/sdd1 /dev/sde1
 
     pvremove /dev/sdb1 /dev/sdc1 /dev/sdd1 /dev/sde1
 
     pvdisplay
+
+    # Move a pv from one vg to another
+    pvmove /dev/sdb1 /dev/sdf1
+    /dev/sdb1: Moved: 1.9%
+    /dev/sdb1: Moved: 3.8%
+    /dev/sdb1: Moved: 5.8%
+
+    # Remove a PV from volume group
+    vgreduce fileserver /dev/sdb1
+    pvremove /dev/sdb1
 
 =======================
 Volume group operations
@@ -92,17 +111,25 @@ Basic operations
 
 ::
 
+    vgscan
+        Reading all physical volumes.  This may take a while...
+        Found volume group "data" using metadata type lvm2
+
     vgcreate fileserver /dev/sdb1 /dev/sdc1 /dev/sdd1 /dev/sde1
 
     vgdisplay
 
     vgrename fileserver data
 
-    vgscan
-        Reading all physical volumes.  This may take a while...
-        Found volume group "data" using metadata type lvm2
-
+    # Remove a Volume Group
     vgremove data
+
+    # Add a disk to a existing volume group
+    vgextend fileserver /dev/sdf1
+
+    # Remove a PV from a volume group
+    vgreduce fileserver /dev/sdb1
+    pvremove /dev/sdb1
 
 =========================
 Logical Volume operations
@@ -111,6 +138,8 @@ Logical Volume operations
 Basic operations
 
 ::
+
+    lvscan
     
     lvcreate --name media --size 1G fileserver
 
@@ -152,4 +181,63 @@ Basic operations
     /dev/mapper/fileserver-media
                            1.0G   33M  992M   4% /var/media
 
+mdadm - RAID
+------------
 
+Linux Software RAID devices are implemented through the md (Multiple Devices) device driver. Currently, Linux supports LINEAR md devices, RAID0 (striping), RAID1 (mirroring), RAID4,  RAID5, RAID6, RAID10, MULTIPATH, FAULTY, and CONTAINER.
+
+Man pages
+
+::
+
+    man mdadm
+
+Display md RAID configuration
+
+::
+
+    # cat /proc/mdstat
+    Personalities : [linear] [multipath] [raid0] [raid1] [raid5] [raid4] [raid6] [raid10]
+    md1 : active raid1 sdd1[2] sde1[0]
+          24418688 blocks [2/1] [U_]
+          [=>...................]  recovery =  6.4% (1586560/24418688) finish=1.9min speed=198320K/sec
+
+    md0 : active raid1 sdb1[2] sdc1[0]
+          24418688 blocks [2/1] [U_]
+          [==>..................]  recovery = 10.5% (2587264/24418688) finish=2.8min speed=129363K/sec
+
+Create a mirroing RAID array 
+
+::
+
+    mdadm --create /dev/md0 --auto=yes -l 1 -n 2 /dev/sde1 /dev/sdf1
+    mdadm --create /dev/md1 --auto=yes -l 1 -n 2 /dev/sdg1 /dev/sdh1
+
+    pvcreate /dev/md0 /dev/md1
+
+Add a disk/partition to RAID array
+
+::
+
+    mdadm --manage /dev/md1 --add /dev/sdd1
+
+Fail a volume in a RAID
+
+::
+
+    mdadm --manage /dev/md0 --fail /dev/sde1
+
+Remove a volume from a RAID
+
+::
+
+    mdadm --manage /dev/md0 --remove /dev/sdb1
+
+Device-mapper
+-------------
+
+In the Linux kernel, the device-mapper serves as a generic framework to map one block device onto another. It forms the foundation of LVM2, software RAIDs, dm-crypt disk encryption, and offers additional features such as file-system snapshots.
+
+Device-mapper works by processing data passed in from a virtual block device, that it itself provides, and then passing the resultant data on to another block device.
+
+Applications (like LVM2 and EVMS) that need to create new mapped devices talk to the device-mapper via the libdevmapper.so shared library, which in turn issues ioctls to the /dev/mapper/control device node. Developers can also access device-mapper from shell scripts via the dmsetup tool.
