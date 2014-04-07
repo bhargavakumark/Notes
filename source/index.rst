@@ -11,7 +11,7 @@ Welcome to segfault's documentation!
         :glob:
 
         filestore/filestore
-        * 
+        *
 
 Indices and tables
 ==================

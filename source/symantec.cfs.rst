@@ -1,4 +1,4 @@
-Symatnec : CFS
+Symantec : CFS
 ==============
 
 .. contents::
