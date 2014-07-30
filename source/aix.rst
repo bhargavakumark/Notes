@@ -372,6 +372,12 @@ How do I install an individual fix by APAR?  To install APAR IY73748 from /dev/c
 
     instfix -k IY73748 -d /dev/cd0
 
+Install a installp image
+
+::
+
+    installp -aXYgd <dir> <filesetname>
+
 
 TL version
 ----------
@@ -401,5 +407,13 @@ JFS format descrbied in **jfs/filsys.h**
     b48e1020  32 30 00 00 00 27 00 01  01 00 00 00 4a 4b d0 a4  |20...'......JK..|
     b48e1030  00 00 00 02 00 00 10 00  00 00 10 00 00 00 00 00  |................|
     b48e1040  00 00 00 05 00 0c 20 00  00 00 00 00 53 4d 58 17  |...... .....SMX.|
+
+Coredump
+--------
+
+::
+
+    ulimit -c unlimited
+    chdev -l sys0 -a fullcore=true      # Enables full core dump
 
 

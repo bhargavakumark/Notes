@@ -25,3 +25,11 @@ Simulator 8 - Clustered mode
 * Default password that you enter might sometimes be taken with 'caps lock ON' so try to login with both passwords
 * autosupport modify -support disable   # To disable autosupport from talking to netapp server
 
+Advanced Commands
+=================
+
+::
+
+    priv set advanced; qtree delete <qtree name>
+
+
