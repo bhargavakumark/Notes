@@ -6,7 +6,7 @@ swapfile
 
 swapfile and hibernate files are located at **/private/var/vm**
 
-We can safely remove **sleepfile** in that location, other swapfile* might be in use
+We can safely remove **sleepimage** in that location, other swapfile* might be in use
 
 ::
 
