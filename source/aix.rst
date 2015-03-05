@@ -378,6 +378,12 @@ Install a installp image
 
     installp -aXYgd <dir> <filesetname>
 
+Extract a bff file
+
+::
+
+    restore -qxvf myFile.bff
+
 
 TL version
 ----------
