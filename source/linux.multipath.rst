@@ -3,6 +3,11 @@ Linux : Multipath
 
 .. contents::
 
+References
+==========
+
+* https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/5/html-single/DM_Multipath/#tb-multipath_attributes
+
 queue_if_no_path
 ================
 

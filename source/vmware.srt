@@ -13,3 +13,10 @@ Creating/developing VMware
 Create vApp
 
 * http://pubs.vmware.com/vsphere-50/index.jsp?topic=%2Fcom.vmware.vsphere.vm_admin.doc_50%2FGUID-36EC5AC9-F132-4378-B85D-3275B4873D39.html
+
+Links
+-----
+
+VMware consolidation
+
+* http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=2003638
