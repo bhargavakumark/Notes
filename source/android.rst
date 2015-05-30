@@ -38,7 +38,8 @@ Connecting to sqlite from adb
 ::
     
     adb shell
-    sqlite3 data/data/com.example.bhargava.useless_tvapp/Useless.db
+    stty rows 60 cols 156
+    sqlite3 data/data/com.example.bhargava.useless_tvapp/databases/Useless.db
 
     sqlite> .header on
     sqlite> .mode column
