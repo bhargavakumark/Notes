@@ -38,7 +38,7 @@ Connecting to sqlite from adb
 ::
     
     adb shell
-    stty rows 60 cols 156
+    resize      # or run with custom size as "stty rows 60 cols 156" 
     sqlite3 -column -header data/data/com.example.bhargava.useless_tvapp/databases/Useless.db
 
     # optional if not passing this as command line
