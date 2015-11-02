@@ -51,6 +51,9 @@ Connecting to sqlite from adb
     # normal sql queries
     sqlite> select * from reminder;
 
+* http://touchlabblog.tumblr.com/post/24474398246/android-sqlite-locking - There is only one connection to DB, for both getReadableDatabase and getWriteableDatabase
+* http://touchlabblog.tumblr.com/post/24474750219/single-sqlite-connection - why having single connection to DB which is never closed is fine
+
 Material Design
 ===============
 
