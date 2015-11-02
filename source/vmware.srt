@@ -21,6 +21,11 @@ VMware consolidation
 
 * http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=2003638
 
+VM Snapshots with VSS and VVols
+===============================
+
+* http://cormachogan.com/2015/03/31/vm-snapshots-with-vss-traditional-versus-vvols/
+
 Services
 ========
 

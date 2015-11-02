@@ -105,6 +105,26 @@ layout_weight
         <Button android:id="@+id/bLogin" android:layout_width="0dp" android:layout_weight="1" android:text="Login"... />
     </LinearLayout>
 
+gravity vs layout_gravity 
+-------------------------
+
+* **android:gravity** sets the gravity of the content of the View its used on.
+* **android:layout_gravity** sets the gravity of the View or Layout in its parent.
+
+Don't use gravity/layout_gravity with a RelativeLayout. Use them for Views in LinearLayouts and FrameLayouts.
+
+If I hadn't made the width and height of the TextViews larger than the text, then setting the gravity would have had no effect. So if you're using wrap_content on the TextView then gravity won't do anything. In the same way, if the LinearLayout had been set to wrap_content, then the layout_gravity would have had no effect on the TextViews.
+
+* https://stackoverflow.com/questions/3482742/gravity-and-layout-gravity-on-android/26190050#26190050
+* http://developer.android.com/reference/android/widget/LinearLayout.LayoutParams.html
+
+margin vs padding
+-----------------
+
+Padding is inside of the border, margin is outside
+
+* https://stackoverflow.com/questions/4619899/difference-between-a-views-padding-and-margin
+
 ViewStub -  Views on demand
 ---------------------------
 
@@ -236,3 +256,10 @@ Optimising Layout Hierarchies
 =============================
 
 * https://developer.android.com/training/improving-layouts/optimizing-layout.html
+
+Fragment backstack
+==================
+
+* https://developer.android.com/guide/components/fragments.html
+* https://stackoverflow.com/questions/12529499/problems-with-android-fragment-back-stack
+
