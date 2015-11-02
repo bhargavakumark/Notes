@@ -51,6 +51,11 @@ Connecting to sqlite from adb
     # normal sql queries
     sqlite> select * from reminder;
 
+Material Design
+===============
+
+* http://android-developers.blogspot.in/2014/10/implementing-material-design-in-your.html
+
 Layout
 ======
 
@@ -82,6 +87,55 @@ Because the LinearLayout is the root view in the layout, it should fill the enti
         android:layout_height="match_parent"
         android:orientation="horizontal" >
     </LinearLayout>
+
+layout_weight
+-------------
+
+* https://stackoverflow.com/questions/3995825/what-does-androidlayout-weight-mean
+
+**layout_weight** tells Android how to distribute your Views in a LinearLayout. Android then first calculates the total proportion required for all Views that have a weight specified and places each View according to what fraction of the screen it has specified it needs. In the following example, Android sees that the TextViews have a layout_weight of 0 (this is the default) and the EditTexts have a layout_weight of 2 each, while the Button has a weight of 1. So Android allocates 'just enough' space to display tvUsername and tvPassword and then divides the remainder of the screen width into 5 equal parts, two of which are allocated to etUsername, two to etPassword and the last part to bLogin:
+
+::
+
+    <LinearLayout android:orientation="horizontal" ...>
+        <TextView android:id="@+id/tvUsername" android:text="Username" android:layout_width="wrap_content" ... />
+        <EditText android:id="@+id/etUsername" android:layout_width="0dp" android:layout_weight="2" ... />
+        <TextView android:id="@+id/tvPassword" android:text="Password" android:layout_width="wrap_content" />
+        <EditText android:id="@+id/etPassword" android:layout_width="0dp" android:layout_weight="2" ... />
+        <Button android:id="@+id/bLogin" android:layout_width="0dp" android:layout_weight="1" android:text="Login"... />
+    </LinearLayout>
+
+ViewStub -  Views on demand
+---------------------------
+
+* https://developer.android.com/training/improving-layouts/loading-ondemand.html#ViewStub
+
+ViewStub is a lightweight view with no dimension and doesn’t draw anything or participate in the layout. As such, it's cheap to inflate and cheap to leave in a view hierarchy. Each ViewStub simply needs to include the android:layout attribute to specify the layout to inflate.
+
+The following ViewStub is for a translucent progress bar overlay. It should be visible only when new items are being imported into the application.
+
+::
+
+    <ViewStub
+        android:id="@+id/stub_import"
+        android:inflatedId="@+id/panel_import"
+        android:layout="@layout/progress_overlay"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom" />
+
+When you want to load the layout specified by the ViewStub, either set it visible by calling setVisibility(View.VISIBLE) or call inflate().
+
+::
+
+    ((ViewStub) findViewById(R.id.stub_import)).setVisibility(View.VISIBLE);
+    // or
+    View importPanel = ((ViewStub) findViewById(R.id.stub_import)).inflate();
+
+Note: The inflate() method returns the inflated View once complete. so you don't need to call findViewById() if you need to interact with the layout.
+
+Once visible/inflated, the ViewStub element is no longer part of the view hierarchy. It is replaced by the inflated layout and the ID for the root view of that layout is the one specified by the android:inflatedId attribute of the ViewStub. (The ID android:id specified for the ViewStub is valid only until the ViewStub layout is visible/inflated.)
+
 
 Fields
 ======
@@ -164,3 +218,21 @@ Navigation keyboard/tab
 
 * https://developer.android.com/training/keyboard-input/navigation.html
 
+Landscape/Portrait mode
+=======================
+
+::
+
+    <activity android:name=".SomeActivity"
+        android:label="@string/app_name"
+        android:screenOrientation="portrait">
+
+Android Support Library
+=======================
+
+* http://android-developers.blogspot.in/2015/04/android-support-library-221.html
+
+Optimising Layout Hierarchies
+=============================
+
+* https://developer.android.com/training/improving-layouts/optimizing-layout.html

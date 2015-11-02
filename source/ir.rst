@@ -15,6 +15,25 @@ Edit **/etc/lirc/hardware.conf** as
     REMOTE_DRIVER=”macmini”
     REMOTE_DEVICE=”/dev/usb/hiddev0″
 
+To use with irrecord
+
+::
+
+    sudo irrecord --device=/dev/usb/hiddev0 --driver=macmini testfile
+
+IR Receiver - USB
+=================
+
+* http://www.irdroid.com/usb-infrared-transmitter/
+
+The above link says its based on IRman driver (but still not able to use with that driver)
+
+To use with irrecord
+
+::
+
+    sudo irrecord --device=/dev/ttyACM0 --driver=irman testfile
+
 LIRC Client
 ===========
 
