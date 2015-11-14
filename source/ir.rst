@@ -284,6 +284,12 @@ Save in **~/.lircrc**
     repeat = 0
     end
 
+IR Codes Database
+=================
+
+* http://www.irdroid.com/db/database/
+* http://winlirc.sourceforge.net/remotes2/
+
 Airtel IR Codes
 ===============
 

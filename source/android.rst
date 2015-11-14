@@ -19,6 +19,8 @@ Genymotion
 
     adb connect <ip>
 
+Installing google apps in genymotion : https://stackoverflow.com/questions/21986237/installing-google-apps-on-genymotion
+
 adb
 ===
 
