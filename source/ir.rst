@@ -284,4 +284,19 @@ Save in **~/.lircrc**
     repeat = 0
     end
 
+Airtel IR Codes
+===============
+
+* http://www.hifi-remote.com/forums/viewtopic.php?t=15020&start=0&postdays=0&postorder=asc&highlight=
+
+airtel remote control code 30014 ?
+
+IrDroid
+=======
+
+* Remotes database - http://www.irdroid.com/db/database/
+* USB Infrared transmitter - http://www.irdroid.com/usb-infrared-transmitter/
+* USB Irdroid app source - https://github.com/Irdroid/Irdroid-USB/tree/master/UsbIrdroid
+
+* USB IR transmitter design by Albert - http://www.huitsing.nl/irftdi/
 
