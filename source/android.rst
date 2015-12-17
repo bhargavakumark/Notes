@@ -268,3 +268,19 @@ Fragment backstack
 * https://developer.android.com/guide/components/fragments.html
 * https://stackoverflow.com/questions/12529499/problems-with-android-fragment-back-stack
 
+dpi - dp/dip
+============
+
+::
+
+    Logical Density    Friendly Name          Scale
+    ===============    =============          =====
+    160                  M DPI                1x
+    240                  H DPI                1.5x
+    320                 XH DPI                2x
+    480                XXH DPI                3x
+
+1dp == one pixel in 160dpi (MDPI) screen and scaled proportionally on higher and lower density screens
+
+DP units keep things roughly **the same physical size** on every android device
+
