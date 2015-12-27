@@ -9,6 +9,16 @@ References
 * http://www.viemu.com/a-why-vi-vim.html
 * http://www.keyxl.com/aaa8263/290/VIM-keyboard-shortcuts.htm
 
+Compiling
+---------
+
+Checkout source from **git clone https://github.com/vim/vim.git**
+
+::
+    ./configure --enable-multibyte --enable-rubyinterp --enable-pythoninterp --enable-perlinterp --enable-luainterp --enable-gui=gtk2 --enable-cscope --with-features=huge --prefix=/usr  --enable-fail-if-missing
+
+    sudo make install
+
 C++ omni complete
 -----------------
 
