@@ -422,4 +422,5 @@ Coredump
     ulimit -c unlimited
     chdev -l sys0 -a fullcore=true      # Enables full core dump
 
+Find ulimit of a running process - http://www-01.ibm.com/support/docview.wss?uid=isg3T1022248
 

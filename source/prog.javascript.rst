@@ -34,7 +34,7 @@ And 2 data types that cannot contain values:
 
 **A JavaScript object is an unordered collection of variables called named values.**
 
-Note    
+Note
 
 * The data type of **NaN is number**
 * The data type of **an array is object**
@@ -50,7 +50,7 @@ Note
 
     function isDate(myDate) {
         return myDate.constructor.toString().indexOf("Date") > -1;
-    } 
+    }
 
 JavaScript Objects are Mutable
 
@@ -59,15 +59,30 @@ JavaScript Objects are Mutable
      var person = {firstName:"John", lastName:"Doe", age:50, eyeColor:"blue"}
 
      var x = person;
-     x.age = 10;           // This will change both x.age and person.age 
+     x.age = 10;           // This will change both x.age and person.age
 
 The JavaScript prototype property allows you to add new properties to an existing prototype:
 
 ::
 
     //adds a new property nationality to person class
-    person.prototype.nationality = "English"; 
+    person.prototype.nationality = "English";
 
+Variables
+=========
+
+Global vs functions variables
+
+::
+    // Global variable
+    function myFunction() {
+        carName = "Volvo";
+    }
+
+    // Function local variable
+    function myFunction() {
+        var carName = "Volvo";
+    }
 
 Syntax
 ======
@@ -80,11 +95,11 @@ variables, A variable declared without a value will have the value **undefined**
 
     ==      equal to
     ===     equal value and equal type
-    
+
     var carName;
     var carName = "Volvo";
     var cars = ["Saab", "Volvo", "BMW"];           // Array
-    var x = {firstName:"John", lastName:"Doe"};    // Object 
+    var x = {firstName:"John", lastName:"Doe"};    // Object
     var x = true;                                  // boolean
     var y = false;
     var car = "";                // The value is "", the typeof is string
@@ -93,7 +108,7 @@ variables, A variable declared without a value will have the value **undefined**
     typeof 3.14                  // Returns number
     typeof false                 // Returns boolean
     typeof [1,2,3,4]             // Returns object
-    typeof {name:'John', age:34} // Returns object 
+    typeof {name:'John', age:34} // Returns object
     // The typeof operator in JavaScript returns "function" for functions.
     // The arguments.length property returns the number of arguments received when the function was invoked:
     // The toString() method returns the function as a string:
@@ -124,16 +139,16 @@ variables, A variable declared without a value will have the value **undefined**
     //Adding elements with high indexes can create undefined "holes" in an array:
     fruits[10] = "Lemon";                // adds a new element (Lemon) to fruits
     fruits.join(" * ");                  // joins array elements with separator
-    fruits.pop(); 
+    fruits.pop();
     fruits.push("Kiwi");
-    fruits.shift();                     // Removes the first element "Banana" from fruits  
-    fruits.unshift("Lemon");            // Adds a new element "Lemon" to fruits 
+    fruits.shift();                     // Removes the first element "Banana" from fruits
+    fruits.unshift("Lemon");            // Adds a new element "Lemon" to fruits
 
-    // If you use a named index, when accessing an array, 
-    // JavaScript will redefine the array to a standard object, 
-    // and all array methods and properties will produce undefined 
+    // If you use a named index, when accessing an array,
+    // JavaScript will redefine the array to a standard object,
+    // and all array methods and properties will produce undefined
     // or incorrect results.
-    In JavaScript, arrays use numbered indexes.  
+    In JavaScript, arrays use numbered indexes.
     In JavaScript, objects use named indexes.
 
 
@@ -142,10 +157,10 @@ variables, A variable declared without a value will have the value **undefined**
         txt += person[x];
     }
 
-    
+
     // The delete keyword deletes both the value of the property and the property itself.
     // After deletion, the property cannot be used before it is added back again.
-    delete person.age;   // or delete person["age"]; 
+    delete person.age;   // or delete person["age"];
 
 
     // Defining a new class/object type
@@ -157,10 +172,10 @@ variables, A variable declared without a value will have the value **undefined**
     }
 
 
-    
+
     (function () {
         var x = "Hello!!";      // I will invoke myself
-    })(); 
+    })();
 
 
 Pass by value/reference
@@ -195,7 +210,7 @@ If a function invocation is preceded with the new keyword, it is a constructor i
 
     // This creates a new object
     var x = new myFunction("John","Doe");
-    x.firstName;                             // Will return "John" 
+    x.firstName;                             // Will return "John"
 
 JavaScript Closures
 ===================
@@ -225,4 +240,15 @@ The counter is protected by the scope of the anonymous function, and can only be
 
 **A closure is a function having access to the parent scope, even after the parent function has closed.**
 
+JavaScript Display output
+=========================
+
+JavaScript Display Possibilities
+
+JavaScript can "display" data in different ways:
+
+* Writing into an alert box, using window.alert().
+* Writing into the HTML output using document.write().
+* Writing into an HTML element, using innerHTML.
+* Writing into the browser console, using console.log().
 

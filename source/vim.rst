@@ -14,6 +14,8 @@ Compiling
 
 Checkout source from **git clone https://github.com/vim/vim.git**
 
+https://github.com/Valloric/YouCompleteMe/wiki/Building-Vim-from-source
+
 ::
     ./configure --enable-multibyte --enable-rubyinterp --enable-pythoninterp --enable-perlinterp --enable-luainterp --enable-gui=gtk2 --enable-cscope --with-features=huge --prefix=/usr  --enable-fail-if-missing
 
