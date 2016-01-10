@@ -305,3 +305,15 @@ Saving State
 ============
 
 http://trickyandroid.com/saving-android-view-state-correctly/
+
+TV - Android TV
+===============
+
+Style for TV - https://developer.android.com/design/tv/style.html
+Typography - https://www.google.com/design/spec/style/typography.html#
+https://developer.android.com/training/tv/playback/browse.html
+https://developer.android.com/training/tv/playback/card.html
+https://developer.android.com/training/tv/playback/details.html
+https://developer.android.com/training/tv/playback/now-playing.html
+https://developer.android.com/training/tv/discovery/index.html
+https://developer.android.com/training/tv/tif/index.html
