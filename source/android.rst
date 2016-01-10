@@ -55,6 +55,9 @@ Connecting to sqlite from adb
 
 * http://touchlabblog.tumblr.com/post/24474398246/android-sqlite-locking - There is only one connection to DB, for both getReadableDatabase and getWriteableDatabase
 * http://touchlabblog.tumblr.com/post/24474750219/single-sqlite-connection - why having single connection to DB which is never closed is fine
+* https://stackoverflow.com/questions/14727006/sqlite-database-in-samsung-tab2-external-micro-sd-card/14744166#14744166 - SQLite on SD card on samsung
+* https://stackoverflow.com/questions/11281010/how-can-i-get-external-sd-card-path-for-android-4-0
+* http://v4all123.blogspot.in/2013/03/sqlite-databases-with-external-db.html
 
 Material Design
 ===============
@@ -284,3 +287,21 @@ dpi - dp/dip
 
 DP units keep things roughly **the same physical size** on every android device
 
+Image Loader
+============
+
+* Universal Image Loader - https://github.com/nostra13/Android-Universal-Image-Loader
+* Volley - https://developer.android.com/training/volley/index.html
+
+Animations
+==========
+
+CardFlip
+--------
+
+https://developer.android.com/training/animation/cardflip.html
+
+Saving State
+============
+
+http://trickyandroid.com/saving-android-view-state-correctly/
