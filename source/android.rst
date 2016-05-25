@@ -42,6 +42,8 @@ Connecting to sqlite from adb
     adb shell
     resize      # or run with custom size as "stty rows 60 cols 156" 
     sqlite3 -column -header data/data/com.example.bhargava.useless_tvapp/databases/Useless.db
+    sqlite3 -column -header data/data/com.tvwiz.tvguide/databases/useless.db
+    sqlite3 -column -header ~/.config/chromium/Default/databases/http_localhost_8101/9
 
     # optional if not passing this as command line
     sqlite> .header on
