@@ -17,30 +17,30 @@ the input from /dev/null to make this work.)
 
 ::
 
-        export DISPLAY=none:0.0
-        export SSH_ASKPASS=/tmp/ssh_askpass.sh
-        pipename="/tmp/ssh_pipe.$$.$$"
+    export DISPLAY=none:0.0
+    export SSH_ASKPASS=/tmp/ssh_askpass.sh
+    pipename="/tmp/ssh_pipe.$$.$$"
 
-        username=$1
-        hostname=$2
-        password=$3
+    username=$1
+    hostname=$2
+    password=$3
 
-        # SSH askpass script.
-        cat > ${SSH_ASKPASS} << EOF
-        #!/bin/bash
-        head -1 ${pipename}
-        EOF
-        chmod 700 ${SSH_ASKPASS}
+    # SSH askpass script.
+    cat > ${SSH_ASKPASS} << EOF
+    #!/bin/bash
+    head -1 ${pipename}
+    EOF
+    chmod 700 ${SSH_ASKPASS}
 
-        # Write password to pipe. We need to go in background as writing to pipe will
-        # not return until someone reads it.
-        echo $password  > ${pipename} &
+    # Write password to pipe. We need to go in background as writing to pipe will
+    # not return until someone reads it.
+    echo $password  > ${pipename} &
 
-        ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 -o NumberOfPasswordPrompts=1 -o UserKnownHostsFile=/dev/null $username@$hostname "ls /" 2> /dev/null
-        # Remove the pipe
-        rm -f ${pipename}
+    ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 -o NumberOfPasswordPrompts=1 -o UserKnownHostsFile=/dev/null $username@$hostname "ls /" 2> /dev/null
+    # Remove the pipe
+    rm -f ${pipename}
 
-        exit 0
+    exit 0
 
 SSH Tunneling
 -------------
@@ -51,14 +51,14 @@ can login to this machine
 
 ::
 
-        ssh -R 1234:127.0.0.1:22 bhargava@10.216.50.132
+    ssh -R 1234:127.0.0.1:22 bhargava@10.216.50.132
 
 To open a port locally and forward any incoming connections on that 
 port to a remoteserver on port 80
 
 ::
 
-        ssh -L 8080:www.google.com:80 bhargava@10.216.50.132
+    ssh -L 8080:www.google.com:80 bhargava@10.216.50.132
 
 ===========
 Socks Proxy
@@ -66,7 +66,12 @@ Socks Proxy
 
 ::
 
-	ssh -D 9999 username@ip-address-of-ssh-server
+    ssh -D 9999 username@ip-address-of-ssh-server
+
+    # Reverse socks proxy, to be run on the same host
+    ssh -R 24680:localhost:12345 remotehost
+    ssh -D 12345 localhost
+
 
 Debug : sshd -d
 ---------------
@@ -78,10 +83,10 @@ Sample pam.d/sshd
 
 ::
 
-	session include common-session
-	#account [default=ignore success=1] pam_succeed_if.so quiet user ingroup sysstoadmin
-	#account [default=bad success=ignore] pam_succeed_if.so quiet user in support:root:sfs-replication
-	account [default=ignore success=done] pam_succeed_if.so quiet user ingroup sysstoadmin
-	account [default=ignore success=done] pam_succeed_if.so quiet user in support:root:sfs-replication
+    session include common-session
+    #account [default=ignore success=1] pam_succeed_if.so quiet user ingroup sysstoadmin
+    #account [default=bad success=ignore] pam_succeed_if.so quiet user in support:root:sfs-replication
+    account [default=ignore success=done] pam_succeed_if.so quiet user ingroup sysstoadmin
+    account [default=ignore success=done] pam_succeed_if.so quiet user in support:root:sfs-replication
 
 
