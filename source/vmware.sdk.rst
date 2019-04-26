@@ -1,6 +1,7 @@
 VMware: SDK
 ===========
 
+* SDK 6.5 - file:///home/bhargava/VMware/SDK-6.5/vSphereManagementSDKReadme.html
 * SDK 6.0 - file:///home/bhargava/VMware/SDK-6.0/vSphereManagementSDKReadme.html
 * SDK 5.5 - file:///home/bhargava/VMware/SDK-5.5/vSphereManagementSDKReadme.html
 * SDK 5.1 - file:///home/bhargava/VMware/SDK-5.1/vSphereManagementSDKReadme.html

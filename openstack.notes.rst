@@ -15,6 +15,9 @@ http://docs.amazonwebservices.com/AWSEC2/2009-04-04/UserGuide/AESDG-chapter-inst
 http://cloudgeekz.com/71/how-to-setup-openstack-to-use-local-disks-for-instances.html
 Raksha Backup - https://wiki.openstack.org/wiki/Raksha
 IBM Cinder Driver - http://docs.openstack.org/juno/config-reference/content/ibm-storwize-svc-driver.html
+Multiple Storage backends - https://ask.openstack.org/en/question/52776/iscsi-target-not-provisioned/
+Multiple Storage backends - http://docs.openstack.org/admin-guide/blockstorage-multi-backend.html
+NFS backend - http://docs.openstack.org/admin-guide/blockstorage-nfs-backend.html
 
 
 Services
