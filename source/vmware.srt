@@ -47,3 +47,8 @@ On ESX vmware logs are stored in /scratch or /var/log
 
 To increase log level, refer http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1004795
 
+VMware Networking Concepts
+==========================
+
+https://docs.vmware.com/en/VMware-vSphere/6.5/com.vmware.vsphere.networking.doc/GUID-2B11DBB8-CB3C-4AFF-8885-EFEA0FC562F4.html
+
