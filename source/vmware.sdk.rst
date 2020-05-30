@@ -46,4 +46,29 @@ Esxcli from SDK
     PS > $errorCode = { $esxcli.storage.core.device.setconfig.Invoke($params) }
     PS > Get-ErrorReport -ProblemScript $errorCode -Destination device.setconfig.trace 
 
+Running from mob viewer
+
+* Find the host-* entry for the ESX. If for ESX esx1.abc.com, moid is host-10, then use ManagedMethodExecuter-10
+* Connect to mobviewer https://<vcenter>/mob/?moid=ManagedMethodExecuter-10&method=executeSoap
+
+::
+
+    moid : ha-cli-handler-storage-core-device-inquirycache
+    version : vim25/5.0
+    method : vim.EsxCLI.storage.core.device.inquirycache.set
+    argument :
+          <argument xmlns="urn:internalreflect">
+            <name>applyall</name>
+            <val>&lt;applyall xmlns="urn:vim25"&gt;False&lt;/applyall&gt;</val>
+          </argument>
+          <argument xmlns="urn:internalreflect">
+            <name>device</name>
+            <val>&lt;device xmlns="urn:vim25"&gt;naa.638a95f2258000039000000000000620&lt;/device&gt;</val>
+          </argument>
+          <argument xmlns="urn:internalreflect">
+            <name>ignore</name>
+            <val>&lt;ignore xmlns="urn:vim25"&gt;True&lt;/ignore&gt;</val>
+          </argument>
+
+
 
