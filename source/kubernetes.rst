@@ -3,6 +3,62 @@ Kubernetes
 
 .. contents:: 
 
+CheatSheet
+==========
+
+* https://kubernetes.io/docs/reference/kubectl/cheatsheet/
+
+Images
+======
+
+Container images are usually given a name such as pause, example/mycontainer, or kube-apiserver. Images can also include a registry hostname; for example: fictional.registry.example/imagename, and possible a port number as well; for example: fictional.registry.example:10443/imagename.
+
+If you don't specify a registry hostname, Kubernetes assumes that you mean the Docker public registry.
+
+After the image name part you can add a tag (as also using with commands such as docker and podman). Tags let you identify different versions of the same series of images.
+
+You should avoid using the latest tag when deploying containers in production, as it is harder to track which version of the image is running and more difficult to roll back to a working version.
+
+Instead, specify a meaningful tag such as v1.42.0
+
+Image Pull
+----------
+
+* https://kubernetes.io/docs/concepts/containers/images/
+* docker hub: Default location from which images are pulled
+** Dockerfile defines how image is pulled from base image and create. In case of mysql base image is debian based. debian:stretch-slim
+** docker hub mysql : https://hub.docker.com/_/mysql - debian based
+** docker hub postgres : https://hub.docker.com/_/postgres - debian based
+** docker hub ubuntu : https://hub.docker.com/_/ubuntu - from scratch
+
+::
+
+    FROM scratch
+    ADD ubuntu-focal-core-cloudimg-amd64-root.tar.gz /   # This is the ubuntu base
+
+Scratch Image
+-------------
+
+* https://hub.docker.com/_/scratch
+
+This image is most useful in the context of building base images (such as debian and busybox) or super minimal images (that contain only a single binary and whatever it requires, such as hello-world).
+
+As of Docker 1.5.0 (specifically, docker/docker#8827), FROM scratch is a no-op in the Dockerfile, and will not create an extra layer in your image (so a previously 2-layer image will be a 1-layer image instead).
+
+From https://docs.docker.com/engine/userguide/eng-image/baseimages/:
+
+* You can use Docker’s reserved, minimal image, scratch, as a starting point for building containers. Using the scratch “image” signals to the build process that you want the next command in the Dockerfile to be the first filesystem layer in your image.
+
+* While scratch appears in Docker’s repository on the hub, you can’t pull it, run it, or tag any image with the name scratch. Instead, you can refer to it in your Dockerfile. For example, to create a minimal container using scratch
+
+Docker Entrypoint
+-----------------
+
+* Entry point in docker : /usr/local/bin/docker-entrypoint.sh 
+
+* MySQL
+** Initializes mysql database if nothing exists in /var/lib/mysql
+
 Clusters
 ========
 

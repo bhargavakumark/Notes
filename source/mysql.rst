@@ -1,3 +1,8 @@
+MySQL
++++++
+
+.. contents::
+
 MySQL - Commands
 ================
 
@@ -27,6 +32,7 @@ MySQL - Commands
 * Create/destroy
 
 ::
+
     # Create Database
     CREATE DATABASE [IF NOT EXISTS] database_name;
 
@@ -67,4 +73,33 @@ Sample Databases
 ================
 
 * https://www.mysqltutorial.org/mysql-sample-database.aspx/
+
+Change mysql directory
+======================
+
+If you want to change mysql directory to /mysqlData, then
+
+* Stop mysql service
+* Change /etc/my.cnf
+
+::
+    
+    [mysqld]
+    datadir=/mysqlData1
+    socket=/mysqlData1/mysql.sock
+
+* chown -R mysql:mysql /mysqlData1/
+* 'su - mysql' and then copy 'cp -r /var/lib/mysql/* /mysqlData1/'
+* Start mysql service
+* If mysql service does not start, run the mysqld_safe command manually as in the init script
+
+::
+
+     /usr/bin/mysqld_safe --datadir=/mysqlData1 --socket=/mysqlData1/mysql.sock --pid-file=/var/run/mysqld/mysqld.pid --basedir=/usr --user=mysql
+
+
+Mysql on Container
+==================
+
+* https://hub.docker.com/_/mysql
 
