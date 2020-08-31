@@ -52,3 +52,9 @@ VMware Networking Concepts
 
 https://docs.vmware.com/en/VMware-vSphere/6.5/com.vmware.vsphere.networking.doc/GUID-2B11DBB8-CB3C-4AFF-8885-EFEA0FC562F4.html
 
+NFC Limits
+==========
+
+* https://www.veritas.com/content/support/en_US/doc/21902280-136588229-0/v27565362-136588229
+* https://vdc-download.vmware.com/vmwb-repository/dcr-public/48f32c72-7f7f-49da-9887-63b7ae1fd6f0/bd841cc1-9e65-4288-be72-75f2aaeecdd2/nbd-perf.html
+
