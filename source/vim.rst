@@ -116,4 +116,52 @@ TagList
 
     :TlistClose             # close taglist window
 
+Linux
+=====
+
+Install Vundle
+--------------
+
+Install vundle from here https://github.com/VundleVim/Vundle.vim
+
+::
+
+    git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+
+    Add the following to .vimrc
+
+	set nocompatible              " be iMproved, required
+	filetype off                  " required
+
+	" set the runtime path to include Vundle and initialize
+	set rtp+=~/.vim/bundle/Vundle.vim
+	call vundle#begin()
+	" alternatively, pass a path where Vundle should install plugins
+	"call vundle#begin('~/some/path/here')
+
+	" let Vundle manage Vundle, required
+	Plugin 'VundleVim/Vundle.vim'
+
+	call vundle#end()            " required
+	filetype plugin indent on    " required
+
+When adding new plugins, add the plugin in .vimrc. Reopen vim, and run :PluginInstall
+
+Install taghighlight
+--------------------
+
+Install from https://github.com/kendling/TagHighlight
+* Add "Plugin 'kendling/taghighlight'" to .vimrc. Reload vim and run :PluginInstall. After install go to a folder with ctags files and open any cpp file and run :UpdateTagsFile
+* Some :UpdateTagsFile fails with python, use the vim script below
+
+Install from the vim script https://www.vim.org/scripts/script.php?script_id=2646
+* Download and extract in .vim folder
+* After install go to a folder with ctags files and open any cpp file and run :UpdateTagsFile
+
+Install YouCompleteMe
+---------------------
+
+Install YouCompleteMe from https://github.com/ycm-core/YouCompleteMe
+
+Use :YcmToggleLogs to check YCM logs if tags are not getting loaded
 
